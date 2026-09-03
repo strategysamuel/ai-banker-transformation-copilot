@@ -1,0 +1,54 @@
+{
+  "policyId": "PC-FEE-001",
+  "title": "Fee Waiver Approval SOP",
+  "version": "2.0",
+  "status": "SUPERSEDED",
+  "effectiveDate": "2025-06-01",
+  "nextReviewDate": "2026-06-30",
+  "policyOwner": "Customer Care & Branch Governance (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Contact Center Agent"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-FEE-001/v2.0",
+  "supersedes": "1.0",
+  "demoData": true,
+  "summary": "[SUPERSEDED] Legacy fee waiver guidelines allowing autonomous frontline reversals without mandatory reason categorization.",
+  "purpose": "Provide fee reversal guidance for customer service staff under the 2025 retail fee framework.",
+  "scope": "Branch bankers and phone customer care agents.",
+  "definitions": [
+    {
+      "term": "DEMO_FEE_TIER_1",
+      "definition": "Historical synthetic discretionary limit of $50 per customer per 12-month period."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Autonomous Discretionary Waivers (Legacy Protocol)",
+      "citationId": "PC-FEE-001-v2.0-section-1",
+      "sourceUri": "demo://project-compass/PC-FEE-001/v2.0/section/1.0",
+      "content": "Bankers may reverse monthly service fees or overdraft fees up to $50 without manager sign-off or logging explanatory reason codes.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent"
+      ]
+    }
+  ],
+  "exceptions": [
+    "None recorded in legacy version."
+  ],
+  "approvalRequirements": [
+    "Single banker waiver under $50."
+  ],
+  "escalationRules": [
+    "Escalate to Branch Manager above $50."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: SUPERSEDED ON 2026-07-01 BY VERSION 2.1."
+  ]
+}

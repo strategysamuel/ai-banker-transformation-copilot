@@ -1,0 +1,96 @@
+{
+  "policyId": "PC-FEE-001",
+  "title": "Fee Waiver Approval SOP",
+  "version": "2.1",
+  "status": "ACTIVE",
+  "effectiveDate": "2026-07-01",
+  "nextReviewDate": "2027-06-30",
+  "policyOwner": "Customer Care & Branch Governance (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Senior Branch Banker",
+    "Contact Center Agent",
+    "Contact Center Supervisor"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-FEE-001/v2.1",
+  "supersedes": "2.0",
+  "demoData": true,
+  "summary": "[ACTIVE] Tiered discretionary authority guidelines, mandatory reason code tagging, and supervisor approval matrices for retail fee adjustments.",
+  "purpose": "Establish clear limits, mandatory reason logging, and supervisory escalation matrices for retail deposit account fee waivers, reversals, and courtesy credits.",
+  "scope": "Applies to all retail branch bankers, contact center specialists, assistant branch managers, and customer experience operations teams.",
+  "definitions": [
+    {
+      "term": "DEMO_FEE_TIER_1",
+      "definition": "Current synthetic frontline banker discretionary ceiling of $50.00 cumulative per customer per rolling 12 months."
+    },
+    {
+      "term": "DEMO_FEE_TIER_2",
+      "definition": "Current synthetic supervisory discretionary ceiling of $150.00 cumulative per customer per rolling 12 months."
+    },
+    {
+      "term": "Bank Error Reversal",
+      "definition": "Direct fee reversal resulting from verified system malfunction, delayed processing, or staff administrative error."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Discretionary Tiers and Authority Matrix",
+      "citationId": "PC-FEE-001-v2.1-section-1",
+      "sourceUri": "demo://project-compass/PC-FEE-001/v2.1/section/1.0",
+      "content": "Frontline Branch Bankers and Contact Center Agents possess discretionary authority to waive eligible retail fees up to DEMO_FEE_TIER_1 ($50.00), capped at a maximum of two (2) occurrences per rolling 12-month period. Senior Branch Bankers and Contact Center Supervisors may authorize waivers up to DEMO_FEE_TIER_2 ($150.00). Waivers exceeding DEMO_FEE_TIER_2 require Branch Manager or Operations Director electronic sign-off.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Contact Center Agent",
+        "Contact Center Supervisor"
+      ]
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Mandatory Reason Code Categorization",
+      "citationId": "PC-FEE-001-v2.1-section-2",
+      "sourceUri": "demo://project-compass/PC-FEE-001/v2.1/section/2.0",
+      "content": "Every fee waiver request submitted in the terminal must be categorized under one of the mandatory standard reason codes: (A) BANK-ERR: Verified operational/system error; (B) COURTESY-FIRST: First-time overdraft/courtesy concession; (C) MILITARY/STUDENT: Certified demographic fee exemption; (D) PRODUCT-TRANSITION: Account conversion grace period. Free-form waivers without selecting a valid reason code are blocked by the system.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent"
+      ]
+    },
+    {
+      "id": "section-3",
+      "sectionNumber": "3.0",
+      "title": "Non-Waivable Fees and Prohibited Adjustments",
+      "citationId": "PC-FEE-001-v2.1-section-3",
+      "sourceUri": "demo://project-compass/PC-FEE-001/v2.1/section/3.0",
+      "content": "The following fees cannot be waived under frontline discretionary authority: (1) Outgoing International Wire SWIFT transmission fees; (2) Legal process levy/garnishment processing fees; (3) Third-party foreign ATM surcharge pass-through charges. Such fees may only be credited if verified as a direct Bank Error with Operations Director approval.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent",
+        "Contact Center Supervisor"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Verified Bank Error reversals do not count against the customer's annual discretionary courtesy waiver allotment.",
+    "Natural disaster relief programs declared by executive management provide automated fee suppressions outside standard branch limits."
+  ],
+  "approvalRequirements": [
+    "Waivers <= $50.00: Branch Banker / Agent single entry.",
+    "Waivers $50.01 - $150.00: Senior Branch Banker / Supervisor approval.",
+    "Waivers > $150.00: Branch Manager / Retail Operations Director approval."
+  ],
+  "escalationRules": [
+    "Customers demanding excessive fee waivers (> $300 cumulative) must be referred to the Customer Relationship Retention Team.",
+    "Repeated overdraft fee waiver requests (> 4 in 6 months) require an account review meeting to evaluate enrollment in Overdraft Protection or transition to a zero-overdraft checking product."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: Fair Lending and synthetic regulatory guidance require consistent, non-discriminatory application of fee waiver matrices across all customer demographics.",
+    "Audit logs must record employee ID, timestamp, customer ID, reason code, and dollar adjustment for all fee adjustments."
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "policyId": "PC-CARD-001",
+  "title": "Debit Card Replacement SOP",
+  "version": "3.0",
+  "status": "ACTIVE",
+  "effectiveDate": "2026-05-15",
+  "nextReviewDate": "2027-05-14",
+  "policyOwner": "Card Services & Branch Operations (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Senior Branch Banker",
+    "Contact Center Agent"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-CARD-001/v3.0",
+  "supersedes": "2.5",
+  "demoData": true,
+  "summary": "Procedures for reporting lost, stolen, or compromised debit cards, instant in-branch card issuance, and standard secure delivery dispatch.",
+  "purpose": "Provide standard operational steps to block compromised debit cards, protect customer account funds, and re-issue debit cards via instant branch embossing or standard secure postal fulfillment.",
+  "scope": "All retail branch staff, phone support representatives, and card services fulfillment personnel.",
+  "definitions": [
+    {
+      "term": "Instant Issuance",
+      "definition": "On-demand encoding and thermal embossing of a personalized debit card inside a physical branch facility."
+    },
+    {
+      "term": "Warm Card Status",
+      "definition": "Temporary card freeze allowing customer to self-unfreeze within 14 days if card is temporarily misplaced."
+    },
+    {
+      "term": "Hot Card Status",
+      "definition": "Permanent non-reversible card block and cancellation due to verified fraud, loss, or theft."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Card Compromise Reporting and Immediate Blocking",
+      "citationId": "PC-CARD-001-v3.0-section-1",
+      "sourceUri": "demo://project-compass/PC-CARD-001/v3.0/section/1.0",
+      "content": "When a customer reports a lost, stolen, or compromised card, the banker must immediately apply 'Hot Card - Stolen/Lost' status in the card portal. This action instantly revokes tokenized digital wallet credentials (Apple Pay/Google Wallet) and declines pending card-present and e-commerce authorizations. If the customer merely misplaced the card at home, a temporary 'Warm Card - Customer Freeze' status may be selected.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent"
+      ]
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Instant In-Branch Issuance Protocol",
+      "citationId": "PC-CARD-001-v3.0-section-2",
+      "sourceUri": "demo://project-compass/PC-CARD-001/v3.0/section/2.0",
+      "content": "For in-person card replacement, the customer must present one (1) unexpired primary photo ID. The banker retrieves a blank EMV chip stock card from the dual-custody vault safe, encodes the card via the branch instant issuance machine, and instructs the customer to input their private 4-digit PIN directly into the secure PIN pad terminal. Bankers are strictly prohibited from viewing or keying PIN numbers on behalf of customers.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker"
+      ]
+    },
+    {
+      "id": "section-3",
+      "sectionNumber": "3.0",
+      "title": "Mail Dispatch and Expedited Courier Delivery",
+      "citationId": "PC-CARD-001-v3.0-section-3",
+      "sourceUri": "demo://project-compass/PC-CARD-001/v3.0/section/3.0",
+      "content": "Standard card replacement orders are dispatched via first-class postal mail within 3 to 5 business days in tamper-evident non-marked security envelopes. Expedited courier delivery (1-2 business days) is available upon customer request; a standard synthetic expedited delivery fee of $15.00 applies unless waived for premium tier clients or active fraud victims.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Cards cannot be mailed to an address that was modified within the preceding 30 days without secondary branch supervisor authorization.",
+    "Emergency international card replacement requires Mastercard/Visa Global Emergency Services coordination."
+  ],
+  "approvalRequirements": [
+    "Standard block & re-issue: Frontline Banker / Agent.",
+    "Instant issuance machine blank card safe retrieval: Dual custody log sign-out by two branch staff members.",
+    "Expedited fee waiver: Senior Branch Banker or Supervisor sign-off."
+  ],
+  "escalationRules": [
+    "If card theft involves fraudulent transactions >= $500, initiate a formal Regulation E synthetic fraud dispute case immediately.",
+    "Escalate to Physical Security and Branch Operations if the instant issuance printer suffers inventory mismatch between physical card count and electronic audit logs."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: Synthetic Regulation E limits consumer liability for unauthorized card transactions when reported promptly.",
+    "Never write down, request, or store customer PIN codes in notes or system logs."
+  ]
+}

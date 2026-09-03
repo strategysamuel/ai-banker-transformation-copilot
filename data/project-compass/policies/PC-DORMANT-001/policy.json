@@ -1,0 +1,93 @@
+{
+  "policyId": "PC-DORMANT-001",
+  "title": "Dormant Account Reactivation SOP",
+  "version": "1.5",
+  "status": "ACTIVE",
+  "effectiveDate": "2026-02-20",
+  "nextReviewDate": "2027-02-19",
+  "policyOwner": "Deposit Operations & Unclaimed Property Desk (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Senior Branch Banker",
+    "Operations Analyst",
+    "Compliance SME"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-DORMANT-001/v1.5",
+  "supersedes": "1.4",
+  "demoData": true,
+  "summary": "Standard workflow for identifying dormant deposit accounts, customer outreach, in-person identity verification, and multi-sign-off reactivation.",
+  "purpose": "Establish procedures to monitor inactive consumer and commercial deposit accounts, prevent unauthorized account takeovers of stagnant balances, ensure compliance with synthetic escheatment timelines, and execute safe account reactivations.",
+  "scope": "Applicable to all retail branch bankers, operations specialists, and unclaimed property administrators.",
+  "definitions": [
+    {
+      "term": "DEMO_DORMANCY_PERIOD",
+      "definition": "Synthetic dormancy timeline of 24 consecutive months (730 calendar days) without customer-initiated financial activity or written communication."
+    },
+    {
+      "term": "Customer-Initiated Activity",
+      "definition": "Direct deposit, withdrawal, debit card swipe, online banking authenticated transfer, or written letter signed by account owner."
+    },
+    {
+      "term": "DEMO_DORMANT_HIGH_BAL",
+      "definition": "Synthetic high-balance dormancy threshold of $25,000.00 requiring dual-level management reactivation approval."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Dormancy Classification and System Restrictions",
+      "citationId": "PC-DORMANT-001-v1.5-section-1",
+      "sourceUri": "demo://project-compass/PC-DORMANT-001/v1.5/section/1.0",
+      "content": "When an account reaches DEMO_DORMANCY_PERIOD (24 months) without customer-initiated activity, the core system automatically assigns 'DORMANT' status. Automated service fees and interest postings are NOT considered customer-initiated activity. Dormant accounts reject incoming debits, automated clearing house (ACH) withdrawals, and ATM transactions, routing them to the exceptions queue.",
+      "applicableRoles": [
+        "Operations Analyst",
+        "Branch Banker"
+      ]
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Reactivation Verification and Workflows",
+      "citationId": "PC-DORMANT-001-v1.5-section-2",
+      "sourceUri": "demo://project-compass/PC-DORMANT-001/v1.5/section/2.0",
+      "content": "To reactivate a dormant account, the account holder must appear in person at a branch with two (2) forms of valid identification (at least one unexpired primary government photo ID) and complete the synthetic Account Reactivation Request Form. Alternatively, remote reactivation is permitted only if the customer completes notarized verification or high-assurance video KYC.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker"
+      ]
+    },
+    {
+      "id": "section-3",
+      "sectionNumber": "3.0",
+      "title": "Approval Thresholds and Escheatment Prevention",
+      "citationId": "PC-DORMANT-001-v1.5-section-3",
+      "sourceUri": "demo://project-compass/PC-DORMANT-001/v1.5/section/3.0",
+      "content": "Dormant accounts with balances under DEMO_DORMANT_HIGH_BAL ($25,000) may be reactivated with Senior Branch Banker sign-off. Accounts with balances equal to or exceeding DEMO_DORMANT_HIGH_BAL require joint approval from the Branch Manager and Central Deposit Operations. If an account remains dormant for 36 months without reactivation, synthetic pre-escheatment statutory notices must be mailed to the last known address.",
+      "applicableRoles": [
+        "Senior Branch Banker",
+        "Operations Analyst",
+        "Compliance SME"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Accounts linked to an active primary checking relationship held by the same primary CIF (tax ID) are exempt from automated dormancy restrictions under the synthetic householding rule.",
+    "Certificates of Deposit (CDs) that automatically roll over are governed under specific CD maturity renewal schedules."
+  ],
+  "approvalRequirements": [
+    "Reactivations < $25,000: Branch Banker submission + Senior Branch Banker verification.",
+    "Reactivations >= $25,000: Branch Manager + Deposit Operations Specialist dual approval."
+  ],
+  "escalationRules": [
+    "Escalate to Fraud Operations if an immediate outbound wire transfer or cashier check request is initiated within 48 hours of a dormant account reactivation.",
+    "Escalate to Unclaimed Property Desk if customer is confirmed deceased or mail is returned as undeliverable."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: Synthetic unclaimed property statutes require state escheatment after 3 to 5 years of verified abandoned dormancy.",
+    "Never execute manual deposits or small balance adjustments to artificially reset dormancy clocks without explicit written customer instruction."
+  ]
+}

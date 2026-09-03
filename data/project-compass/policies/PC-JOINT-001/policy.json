@@ -1,0 +1,97 @@
+{
+  "policyId": "PC-JOINT-001",
+  "title": "Joint Account Ownership SOP",
+  "version": "2.2",
+  "status": "ACTIVE",
+  "effectiveDate": "2026-06-15",
+  "nextReviewDate": "2027-06-14",
+  "policyOwner": "Retail Deposit Product Management (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Senior Branch Banker",
+    "Operations Analyst"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-JOINT-001/v2.2",
+  "supersedes": "2.1",
+  "demoData": true,
+  "summary": "Operating rules for joint tenancy with rights of survivorship, tenancy in common, signature mandates, adding/removing owners, and dispute handling.",
+  "purpose": "Define operational protocols, ownership rights, signature authorities, survivorship mandates, and dispute management for multi-party consumer deposit accounts.",
+  "scope": "All branch personnel, private banking relationship managers, and retail operations specialists.",
+  "definitions": [
+    {
+      "term": "JTWROS",
+      "definition": "Joint Tenancy with Right of Survivorship: Each joint owner owns an undivided 100% interest; upon death of one owner, balance passes directly to surviving co-owner(s)."
+    },
+    {
+      "term": "Tenancy in Common (TIC)",
+      "definition": "Each owner holds a designated percentage share; upon death of an owner, their fractional share passes to their legal estate or heirs, not the co-owner."
+    },
+    {
+      "term": "Either-to-Sign Mandate",
+      "definition": "Standard mandate where any single joint owner may deposit, withdraw, transfer, or pledge funds independently without co-owner consent."
+    },
+    {
+      "term": "Both-to-Sign Mandate",
+      "definition": "Restricted signature mandate requiring all co-owners' signatures on every debit withdrawal or transfer instrument."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Establishing Joint Ownership Types and Mandates",
+      "citationId": "PC-JOINT-001-v2.2-section-1",
+      "sourceUri": "demo://project-compass/PC-JOINT-001/v2.2/section/1.0",
+      "content": "All joint account applicants must be physically present or complete verified electronic digital onboarding with unexpired primary photo IDs. The default joint ownership type is JTWROS with an Either-to-Sign mandate. If applicants elect Tenancy in Common or Both-to-Sign, specific supplementary disclosures and manual core system flags must be applied.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker"
+      ]
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Adding or Removing Joint Co-Owners",
+      "citationId": "PC-JOINT-001-v2.2-section-2",
+      "sourceUri": "demo://project-compass/PC-JOINT-001/v2.2/section/2.0",
+      "content": "Adding a new joint owner to an existing account requires written consent and signatures from ALL existing account owners and the incoming party. Removing an existing joint owner requires signed notarized relinquishment from the departing party, or requires closing the account and opening a new individual account in the remaining owner's name. One owner cannot unilaterally remove a co-owner without their written consent.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Operations Analyst"
+      ]
+    },
+    {
+      "id": "section-3",
+      "sectionNumber": "3.0",
+      "title": "Joint Owner Disputes and Administrative Freezes",
+      "citationId": "PC-JOINT-001-v2.2-section-3",
+      "sourceUri": "demo://project-compass/PC-JOINT-001/v2.2/section/3.0",
+      "content": "In the event of a written dispute, divorce filing, or competing conflicting demands from joint owners, the Branch Manager or Legal Operations may place an administrative 'Dispute Freeze' on the account. While frozen, no outbound withdrawals are permitted without a court order or joint written authorization signed by all registered co-owners.",
+      "applicableRoles": [
+        "Senior Branch Banker",
+        "Operations Analyst"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Removal of a deceased joint owner on a JTWROS account does not require a court order; presentation of a certified death certificate enables the surviving owner to retitle the account.",
+    "Court injunctions or restraining orders immediately override standard Either-to-Sign mandates."
+  ],
+  "approvalRequirements": [
+    "Joint account opening: Standard Branch Banker submission.",
+    "Adding a co-owner: Senior Branch Banker secondary verification of all signature cards.",
+    "Administrative Dispute Freeze placement/release: Branch Manager or Legal Operations Specialist."
+  ],
+  "escalationRules": [
+    "Escalate to Legal Advisory Desk if joint owners threaten litigation or deliver competing attorney letters.",
+    "Escalate to Fraud Prevention if one joint owner claims unauthorized withdrawal immediately preceding a relationship dissolution."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: Joint account balances are subject to joint liability for overdrafts and tax reporting requirements under synthetic IRS guidelines.",
+    "Do not provide legal advice regarding estate planning consequences of JTWROS vs Tenancy in Common."
+  ]
+}

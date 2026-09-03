@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function() {
+        const isIgnored = function(msg) {
+          if (!msg) return false;
+          const str = typeof msg === 'string' ? msg : (msg.message || msg.stack || String(msg));
+          return str.includes('MetaMask') ||
+                 str.includes('ethereum') ||
+                 str.includes('web3') ||
+                 str.includes('chrome-extension://') ||
+                 str.includes('Failed to connect to MetaMask');
+        };
+
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+          if (args.some(isIgnored)) {
+            return;
+          }
+          originalConsoleError.apply(console, args);
+        };
+
+        const originalConsoleWarn = console.warn;
+        console.warn = function(...args) {
+          if (args.some(isIgnored)) {
+            return;
+          }
+          originalConsoleWarn.apply(console, args);
+        };
+
+        window.addEventListener('error', function(event) {
+          if (isIgnored(event.message) || isIgnored(event.error) || (event.filename && event.filename.includes('chrome-extension://'))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(event) {
+          if (isIgnored(event.reason)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Banker Transformation Copilot</title>
+    <meta name="description" content="Enterprise Generative AI copilot empowering banking professionals in productivity, customer engagement, process optimization, and AI skill transformation." />
+    <meta property="og:title" content="AI Banker Transformation Copilot" />
+    <meta property="og:description" content="Enterprise Generative AI copilot empowering banking professionals in productivity, customer engagement, process optimization, and AI skill transformation." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-slate-950 text-slate-100 antialiased selection:bg-blue-600 selection:text-white font-['Plus_Jakarta_Sans',sans-serif]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

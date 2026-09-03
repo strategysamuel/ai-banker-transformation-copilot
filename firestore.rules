@@ -1,0 +1,172 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User profile validation
+    function isValidUserProfile(data) {
+      return data.uid is string &&
+             data.uid == request.auth.uid &&
+             data.email is string &&
+             data.email.size() <= 256 &&
+             (!('displayName' in data) || data.displayName == null || (data.displayName is string && data.displayName.size() <= 250)) &&
+             (!('photoURL' in data) || data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 2048)) &&
+             (!('role' in data) || data.role == null || (data.role is string && data.role.size() <= 100)) &&
+             (!('department' in data) || data.department == null || (data.department is string && data.department.size() <= 150)) &&
+             (!('institution' in data) || data.institution == null || (data.institution is string && data.institution.size() <= 200)) &&
+             (!('transformationScore' in data) || (data.transformationScore is number && data.transformationScore >= 0 && data.transformationScore <= 100)) &&
+             (!('sessionsCount' in data) || (data.sessionsCount is number && data.sessionsCount >= 0)) &&
+             (!('completedTasksCount' in data) || (data.completedTasksCount is number && data.completedTasksCount >= 0));
+    }
+
+    // Interaction validation
+    function isValidInteraction(data) {
+      return data.id is string &&
+             data.id.size() <= 128 &&
+             data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.type is string &&
+             data.type in ['copilot', 'meeting_prep', 'email_assistant', 'process_optimizer', 'learning_assistant', 'learning_progress', 'transformation_assessment', 'transformation_plan'] &&
+             data.title is string &&
+             data.title.size() <= 300 &&
+             (!('summary' in data) || data.summary == null || (data.summary is string && data.summary.size() <= 2000));
+    }
+
+    // Transformation assessment validation
+    function isValidTransformationAssessment(data) {
+      return data.id is string &&
+             data.id.size() <= 128 &&
+             data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.overallScore is number &&
+             data.overallScore >= 0 &&
+             data.overallScore <= 100;
+    }
+
+    // Transformation plan validation
+    function isValidTransformationPlan(data) {
+      return data.id is string &&
+             data.id.size() <= 128 &&
+             data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.status is string &&
+             data.status in ['active', 'completed', 'archived'] &&
+             (!('currentWeek' in data) || (data.currentWeek is number && data.currentWeek >= 1 && data.currentWeek <= 4));
+    }
+
+    // Learning progress validation
+    function isValidLearningProgress(data) {
+      return data.id is string &&
+             data.id.size() <= 128 &&
+             data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.topicId is string &&
+             data.topicId.size() <= 128 &&
+             data.status is string &&
+             data.status in ['not_started', 'in_progress', 'completed'] &&
+             (!('quizScore' in data) || (data.quizScore is number && data.quizScore >= 0 && data.quizScore <= 100));
+    }
+
+    // Collection: /users/{userId}
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false; // Strict PII protection: never allow user enumeration
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().uid == userId;
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().uid == userId;
+      allow delete: if false; // Profiles are permanent records
+
+      // Subcollection: /users/{userId}/interactions/{interactionId}
+      match /interactions/{interactionId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(interactionId) &&
+                         isValidInteraction(incoming()) &&
+                         incoming().userId == userId;
+        allow update: if isOwner(userId) &&
+                         isValidId(interactionId) &&
+                         isValidInteraction(incoming()) &&
+                         incoming().userId == userId;
+        allow delete: if isOwner(userId) && isValidId(interactionId);
+      }
+
+      // Subcollection: /users/{userId}/transformationAssessments/{assessmentId}
+      match /transformationAssessments/{assessmentId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(assessmentId) &&
+                         isValidTransformationAssessment(incoming()) &&
+                         incoming().userId == userId;
+        allow update: if isOwner(userId) &&
+                         isValidId(assessmentId) &&
+                         isValidTransformationAssessment(incoming()) &&
+                         incoming().userId == userId;
+        allow delete: if isOwner(userId) && isValidId(assessmentId);
+      }
+
+      // Subcollection: /users/{userId}/transformationPlans/{planId}
+      match /transformationPlans/{planId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(planId) &&
+                         isValidTransformationPlan(incoming()) &&
+                         incoming().userId == userId;
+        allow update: if isOwner(userId) &&
+                         isValidId(planId) &&
+                         isValidTransformationPlan(incoming()) &&
+                         incoming().userId == userId;
+        allow delete: if isOwner(userId) && isValidId(planId);
+      }
+
+      // Subcollection: /users/{userId}/learningProgress/{topicId}
+      match /learningProgress/{topicId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+                         isValidId(topicId) &&
+                         isValidLearningProgress(incoming()) &&
+                         incoming().userId == userId;
+        allow update: if isOwner(userId) &&
+                         isValidId(topicId) &&
+                         isValidLearningProgress(incoming()) &&
+                         incoming().userId == userId;
+        allow delete: if isOwner(userId) && isValidId(topicId);
+      }
+    }
+
+    // Health probe for Firestore connectivity tests
+    match /test/{docId} {
+      allow get: if true;
+      allow list, write: if false;
+    }
+  }
+}

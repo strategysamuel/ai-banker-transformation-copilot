@@ -1,0 +1,92 @@
+{
+  "policyId": "PC-ACCOUNT-001",
+  "title": "Deposit Account Opening SOP",
+  "version": "1.0",
+  "status": "ACTIVE",
+  "effectiveDate": "2026-01-15",
+  "nextReviewDate": "2027-01-14",
+  "policyOwner": "Retail Banking Operations Committee (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Senior Branch Banker",
+    "Contact Center Agent"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-ACCOUNT-001/v1.0",
+  "supersedes": null,
+  "demoData": true,
+  "summary": "Standard operating procedure for verifying customer identity, collecting KYC documentation, and opening retail checking and savings accounts.",
+  "purpose": "Establish clear, standardized steps for frontline retail bankers to verify customer identities, fulfill synthetic Customer Due Diligence (CDD) requirements, and open retail deposit accounts.",
+  "scope": "Applies to all retail branch personnel, virtual relationship bankers, and central deposit operations specialists opening personal checking, savings, or money market accounts.",
+  "definitions": [
+    {
+      "term": "Primary ID",
+      "definition": "Unexpired government-issued photo identification including passport, state driver's license, or national identity card."
+    },
+    {
+      "term": "Secondary ID",
+      "definition": "Valid secondary proof such as major credit card, employee photo ID, or utility bill issued within the last 90 days."
+    },
+    {
+      "term": "DEMO_MIN_OPENING_DEPOSIT",
+      "definition": "Synthetic minimum opening deposit benchmark of $25.00 for basic consumer checking accounts."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Customer Identification and Due Diligence",
+      "citationId": "PC-ACCOUNT-001-v1.0-section-1",
+      "sourceUri": "demo://project-compass/PC-ACCOUNT-001/v1.0/section/1.0",
+      "content": "Bankers must obtain and physically inspect one (1) unexpired Primary ID and one (1) Secondary ID. The customer's legal name, date of birth, residential address, and taxpayer identification number must be recorded into the core deposit workstation. If the customer is a non-resident alien, an unexpired foreign passport with valid consular visa documentation is mandatory.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker"
+      ],
+      "governanceGuidance": "Demo governance guidance: Meets synthetic KYC/CDD baseline requirements."
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Initial Deposit and Funding Verification",
+      "citationId": "PC-ACCOUNT-001-v1.0-section-2",
+      "sourceUri": "demo://project-compass/PC-ACCOUNT-001/v1.0/section/2.0",
+      "content": "The customer must tender the minimum initial deposit equal to or exceeding DEMO_MIN_OPENING_DEPOSIT. Initial funding may be executed via cash, internal ledger transfer from an existing verified account, or teller cashier's check. Personal third-party checks deposited at account opening are subject to a mandatory 5-business-day new account settlement hold.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker"
+      ]
+    },
+    {
+      "id": "section-3",
+      "sectionNumber": "3.0",
+      "title": "Document Archival and Customer Welcome Disclosure",
+      "citationId": "PC-ACCOUNT-001-v1.0-section-3",
+      "sourceUri": "demo://project-compass/PC-ACCOUNT-001/v1.0/section/3.0",
+      "content": "All scanned identity records, the signed electronic Deposit Account Agreement, and Fee Schedules must be archived in the Document Archival Vault within 24 hours of account creation. The banker must provide the customer with a physical or secure electronic welcome packet containing account routing details and the synthetic Truth in Savings disclosure.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Customers lacking a primary photo ID due to age (minors under 16) may open a custodial UTMA/UGMA account utilizing a certified birth certificate accompanied by the parent/guardian's primary photo identification.",
+    "Temporary residential addresses (hotels, PO Boxes) are strictly prohibited as primary addresses; accounts may only list a PO Box as an optional secondary mailing address."
+  ],
+  "approvalRequirements": [
+    "Standard account openings require single-operator banker submission.",
+    "Accounts opened for non-resident clients or entities with foreign beneficial ownership require Senior Branch Banker or Compliance SME review prior to debit card provisioning."
+  ],
+  "escalationRules": [
+    "Escalate to Fraud Prevention Operations if automated OFAC/Sanction screening returns a potential match score >= 85%.",
+    "Escalate to Branch Operations Manager if customer refuses to provide residential physical address proof."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: Customer identity records must be retained in accordance with synthetic 7-year record retention mandates.",
+    "Do not advise customers on tax withholding implications; provide standard synthetic IRS Form W-9 / W-8BEN guidance only."
+  ]
+}

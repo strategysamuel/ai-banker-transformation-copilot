@@ -1,0 +1,66 @@
+{
+  "policyId": "PC-WIRE-001",
+  "title": "International Wire Transfer SOP",
+  "version": "4.1",
+  "status": "SUPERSEDED",
+  "effectiveDate": "2025-01-10",
+  "nextReviewDate": "2026-07-31",
+  "policyOwner": "Global Payments & Wire Operations (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Senior Branch Banker",
+    "Operations Analyst"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-WIRE-001/v4.1",
+  "supersedes": "4.0",
+  "demoData": true,
+  "summary": "[SUPERSEDED] Historical wire procedure requiring supervisor approval at the legacy threshold of DEMO_LIMIT_A ($5,000).",
+  "purpose": "Provide procedural guidelines for executing outbound international telegraphic transfers (SWIFT/Wires) under the legacy 2025 risk framework.",
+  "scope": "Applies to all retail and commercial branch staff processing customer-initiated cross-border funds transfers.",
+  "definitions": [
+    {
+      "term": "DEMO_LIMIT_A",
+      "definition": "Historical synthetic threshold of $5,000.00 USD equivalent requiring branch manager verbal callback."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Wire Order Capture (Legacy Protocol)",
+      "citationId": "PC-WIRE-001-v4.1-section-1",
+      "sourceUri": "demo://project-compass/PC-WIRE-001/v4.1/section/1.0",
+      "content": "Banker captures beneficiary SWIFT BIC, IBAN, beneficiary name, physical address, and remittance purpose. Banker verifies physical signature against signature card.",
+      "applicableRoles": [
+        "Branch Banker"
+      ]
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Authorization Thresholds (Legacy Protocol)",
+      "citationId": "PC-WIRE-001-v4.1-section-2",
+      "sourceUri": "demo://project-compass/PC-WIRE-001/v4.1/section/2.0",
+      "content": "Supervisor approval and verbal callback verification are required for all transactions exceeding DEMO_LIMIT_A ($5,000 USD equivalent). Transactions below DEMO_LIMIT_A may be released with standard branch banker single authorization.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Governmental remittance exceptions allowed with senior operations sign-off."
+  ],
+  "approvalRequirements": [
+    "Supervisor review required above DEMO_LIMIT_A ($5,000 USD)."
+  ],
+  "escalationRules": [
+    "Escalate to Wire Operations Desk if intermediary bank routing is missing."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: SUPERSEDED ON 2026-08-01 BY VERSION 4.2."
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "policyId": "PC-POA-001",
+  "title": "Power of Attorney Handling SOP",
+  "version": "2.0",
+  "status": "ACTIVE",
+  "effectiveDate": "2026-03-01",
+  "nextReviewDate": "2027-02-28",
+  "policyOwner": "Legal & Fiduciary Advisory Desk (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Senior Branch Banker",
+    "Operations Analyst",
+    "Compliance SME"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-POA-001/v2.0",
+  "supersedes": "1.0",
+  "demoData": true,
+  "summary": "Procedures for receiving, logging, validating, and recording Power of Attorney and court-appointed legal guardianship appointments.",
+  "purpose": "Ensure all Power of Attorney (POA), conservatorship, and guardianship documents presented by agents or attorneys-in-fact are legally verified, authenticated, and accurately configured in core banking records.",
+  "scope": "Applies to all retail branches, private wealth offices, and operations teams handling fiduciary document submissions.",
+  "definitions": [
+    {
+      "term": "Principal",
+      "definition": "The account owner granting legal authority to another person."
+    },
+    {
+      "term": "Agent / Attorney-in-Fact",
+      "definition": "The designated individual authorized to act on behalf of the Principal."
+    },
+    {
+      "term": "Durable POA",
+      "definition": "A power of attorney that remains in full legal effect even if the Principal becomes incapacitated."
+    },
+    {
+      "term": "DEMO_SLA_48H",
+      "definition": "Synthetic 48-business-hour service level agreement for Central Legal Operations review."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Intake and Document Collection",
+      "citationId": "PC-POA-001-v2.0-section-1",
+      "sourceUri": "demo://project-compass/PC-POA-001/v2.0/section/1.0",
+      "content": "Banker must obtain the original or certified true copy of the Power of Attorney document bearing valid notary seal and signatures. Banker must obtain unexpired government photo ID and SSN/Tax ID of the designated Agent. The Agent must complete and sign the Bank's synthetic Affidavit of Agent in the presence of the banker.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker"
+      ]
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Legal Validation Routing & Turnaround",
+      "citationId": "PC-POA-001-v2.0-section-2",
+      "sourceUri": "demo://project-compass/PC-POA-001/v2.0/section/2.0",
+      "content": "The branch must scan the entire document package into the Legal Workflow Portal within two (2) hours of receipt. Central Legal Operations will review the document scope (specific vs general, durable vs springing, banking powers grant) within DEMO_SLA_48H. Frontline staff must NOT activate transactional privileges until legal approval status reflects 'APPROVED' in the portal.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Operations Analyst",
+        "Compliance SME"
+      ]
+    },
+    {
+      "id": "section-3",
+      "sectionNumber": "3.0",
+      "title": "System Profile Tagging and Restrictions",
+      "citationId": "PC-POA-001-v2.0-section-3",
+      "sourceUri": "demo://project-compass/PC-POA-001/v2.0/section/3.0",
+      "content": "Upon legal clearance, the banker establishes an Authorized Signer / Agent profile linked to the Principal's account with title 'Attorney-in-Fact'. Agents may NOT add themselves as joint owners, change beneficiary designations (TOD/POD), or open new borrowing lines unless explicitly permitted in express statutory powers granted in the underlying POA instrument.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Operations Analyst"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Springing POA instruments require accompanying medical certification of incapacity from a licensed medical practitioner prior to legal routing.",
+    "Court-appointed guardianship/conservatorship orders issued by a probate court within the last 60 days supersede private POA documents."
+  ],
+  "approvalRequirements": [
+    "Frontline intake: Branch Banker.",
+    "Document validity and authority scope approval: Central Legal Operations Specialist.",
+    "Transactional activation: Senior Branch Banker secondary verification."
+  ],
+  "escalationRules": [
+    "Escalate immediately to Adult Protective Services Risk Liaison if signs of financial elder exploitation, coercion, or suspicious sudden revocation occur.",
+    "Escalate to Senior Legal Counsel if multiple conflicting POA instruments are presented by competing family members."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: Fiduciary documents must be reviewed for durability and specific banking authority.",
+    "Never allow an Agent to execute self-dealing transactions or transfer principal funds into the Agent's personal individual account without clear documentary authority."
+  ]
+}

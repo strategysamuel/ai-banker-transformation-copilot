@@ -1,0 +1,125 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated banking professional profile and AI transformation stats",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "Verified Google user email" },
+        "displayName": { "type": "string", "maxLength": 150, "description": "User display name" },
+        "photoURL": { "type": "string", "maxLength": 500, "description": "User profile photo URL" },
+        "role": { "type": "string", "maxLength": 50, "description": "Banking professional role" },
+        "department": { "type": "string", "maxLength": 100, "description": "Banking department" },
+        "institution": { "type": "string", "maxLength": 150, "description": "Financial institution name" },
+        "transformationScore": { "type": "number", "description": "AI maturity score (0-100)" },
+        "sessionsCount": { "type": "number", "description": "Total AI sessions generated" },
+        "completedTasksCount": { "type": "number", "description": "Tasks completed in transformation plan" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Profile creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Profile last update timestamp" },
+        "lastLoginAt": { "type": "string", "format": "date-time", "description": "Last login timestamp" }
+      },
+      "required": ["uid", "email", "createdAt", "lastLoginAt"]
+    },
+    "Interaction": {
+      "title": "Interaction",
+      "description": "User interaction session with AI Copilot, Meeting Prep, Email Assistant, or Process Optimizer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Interaction UUID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "type": { "type": "string", "enum": ["copilot", "meeting_prep", "email_assistant", "process_optimizer", "learning_assistant", "learning_progress", "transformation_assessment", "transformation_plan"] },
+        "title": { "type": "string", "maxLength": 200, "description": "Session title" },
+        "summary": { "type": "string", "maxLength": 1000, "description": "Brief session summary" },
+        "messages": { "type": "array", "description": "Conversation message history" },
+        "metadata": { "type": "object", "description": "Structured parameters or generated outputs" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" }
+      },
+      "required": ["id", "userId", "type", "title", "createdAt", "updatedAt"]
+    },
+    "TransformationAssessment": {
+      "title": "TransformationAssessment",
+      "description": "Assessment results evaluating AI awareness, adoption, governance, and readiness",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Assessment ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "overallScore": { "type": "number", "description": "Score 0-100" },
+        "categoryScores": { "type": "object", "description": "Breakdown by category" },
+        "strengths": { "type": "array", "description": "Key strengths identified" },
+        "improvementAreas": { "type": "array", "description": "Areas for growth" },
+        "recommendedActions": { "type": "array", "description": "Immediate high-impact recommendations" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Assessment timestamp" }
+      },
+      "required": ["id", "userId", "overallScore", "createdAt"]
+    },
+    "TransformationPlan": {
+      "title": "TransformationPlan",
+      "description": "Personalized 30-day AI transformation roadmap",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Plan ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "status": { "type": "string", "enum": ["active", "completed", "archived"] },
+        "currentWeek": { "type": "number", "description": "Current active week (1-4)" },
+        "weeks": { "type": "array", "description": "Weekly structured milestones and tasks" },
+        "completedTaskIds": { "type": "array", "description": "List of completed task IDs" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Plan creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Plan last updated timestamp" }
+      },
+      "required": ["id", "userId", "status", "createdAt", "updatedAt"]
+    },
+    "LearningProgress": {
+      "title": "LearningProgress",
+      "description": "Progress tracking for AI and banking automation topics",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Topic identifier" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "topicId": { "type": "string", "description": "Unique topic code" },
+        "topicTitle": { "type": "string", "maxLength": 150, "description": "Topic Title" },
+        "difficulty": { "type": "string", "enum": ["Beginner", "Intermediate", "Advanced"] },
+        "status": { "type": "string", "enum": ["not_started", "in_progress", "completed"] },
+        "quizScore": { "type": "number", "description": "Quiz completion score percentage" },
+        "completedAt": { "type": "string", "format": "date-time", "description": "Completion timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Progress timestamp" }
+      },
+      "required": ["id", "userId", "topicId", "status", "updatedAt"]
+    },
+    "ConnectionProbe": {
+      "title": "ConnectionProbe",
+      "description": "System health probe for Firestore connectivity validation",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "UserProfile" },
+      "description": "User profile with AI metrics and account details isolated by UID"
+    },
+    "/users/{userId}/interactions/{interactionId}": {
+      "schema": { "$ref": "Interaction" },
+      "description": "User AI interactions and multi-turn conversations"
+    },
+    "/users/{userId}/transformationAssessments/{assessmentId}": {
+      "schema": { "$ref": "TransformationAssessment" },
+      "description": "User AI transformation assessment scorecards"
+    },
+    "/users/{userId}/transformationPlans/{planId}": {
+      "schema": { "$ref": "TransformationPlan" },
+      "description": "User 30-day AI transformation roadmap and task tracking"
+    },
+    "/users/{userId}/learningProgress/{topicId}": {
+      "schema": { "$ref": "LearningProgress" },
+      "description": "Topic learning mastery and module progress"
+    },
+    "/test/{docId}": {
+      "schema": { "$ref": "ConnectionProbe" },
+      "description": "Read-only probe collection for client connectivity health-checks"
+    }
+  }
+}

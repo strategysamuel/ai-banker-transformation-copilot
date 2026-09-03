@@ -1,0 +1,101 @@
+{
+  "policyId": "PC-COMPLAINT-001",
+  "title": "Customer Complaint Escalation SOP",
+  "version": "3.1",
+  "status": "ACTIVE",
+  "effectiveDate": "2026-05-01",
+  "nextReviewDate": "2027-04-30",
+  "policyOwner": "Customer Experience & Regulatory Relations (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Contact Center Agent",
+    "Contact Center Supervisor",
+    "Operations Analyst",
+    "Compliance SME"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-COMPLAINT-001/v3.1",
+  "supersedes": "3.0",
+  "demoData": true,
+  "summary": "Three-tiered escalation matrix, strict SLA resolution windows, mandatory root-cause tracking, and regulatory complaint reporting workflows.",
+  "purpose": "Provide a standardized enterprise framework for receiving, recording, investigating, resolving, and reporting customer grievances across all retail channels.",
+  "scope": "Mandatory for all customer-facing personnel, branch managers, phone supervisors, executive customer care specialists, and regulatory compliance analysts.",
+  "definitions": [
+    {
+      "term": "Complaint",
+      "definition": "Any oral or written expression of dissatisfaction by a customer concerning the Bank's products, fees, services, employees, or regulatory disclosures."
+    },
+    {
+      "term": "Tier 1 Complaint",
+      "definition": "Routine frontline grievances resolvable within DEMO_SLA_24H (e.g. fee clarification, minor service delay)."
+    },
+    {
+      "term": "Tier 2 Complaint",
+      "definition": "Escalated grievances requiring manager intervention, operational research, or disputed transactions within DEMO_SLA_3D (3 business days)."
+    },
+    {
+      "term": "Tier 3 Complaint",
+      "definition": "High-risk grievances alleging regulatory violations, discrimination, legal threats, or executive office inquiries with DEMO_SLA_5D resolution SLA."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Complaint Intake, Logging, and Categorization",
+      "citationId": "PC-COMPLAINT-001-v3.1-section-1",
+      "sourceUri": "demo://project-compass/PC-COMPLAINT-001/v3.1/section/1.0",
+      "content": "Every employee who receives a customer complaint must log an incident ticket in the Central Grievance Portal within two (2) hours of receipt. The ticket must capture customer details, channel, specific grievance summary, root cause category, and current status. Frontline staff must NOT attempt to conceal or resolve complaints informally without logging.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent",
+        "Contact Center Supervisor"
+      ]
+    },
+    {
+      "id": "section-2",
+      "sectionNumber": "2.0",
+      "title": "Three-Tier Escalation SLA Matrix",
+      "citationId": "PC-COMPLAINT-001-v3.1-section-2",
+      "sourceUri": "demo://project-compass/PC-COMPLAINT-001/v3.1/section/2.0",
+      "content": "(1) Tier 1: Frontline staff must resolve or escalate within 24 hours. (2) Tier 2: Branch Managers or Team Leads must provide written or verbal resolution within three (3) business days. (3) Tier 3: Executive Customer Relations and Compliance must complete comprehensive investigation and send formal written resolution within five (5) business days.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Supervisor",
+        "Operations Analyst",
+        "Compliance SME"
+      ]
+    },
+    {
+      "id": "section-3",
+      "sectionNumber": "3.0",
+      "title": "Regulatory Agency Complaints Handling",
+      "citationId": "PC-COMPLAINT-001-v3.1-section-3",
+      "sourceUri": "demo://project-compass/PC-COMPLAINT-001/v3.1/section/3.0",
+      "content": "Complaints originating from regulatory bodies (such as synthetic CFPB, OCC, or state banking departments) or alleging discrimination/UDAAP must be routed directly to the Regulatory Affairs Desk within one (1) hour of receipt. Frontline staff are strictly prohibited from responding to regulatory agencies directly.",
+      "applicableRoles": [
+        "Compliance SME",
+        "Operations Analyst"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Anonymous complaints must still be logged in the grievance portal with category 'ANONYMOUS' for compliance trending.",
+    "Complex fraud dispute investigations may extend past standard SLAs with customer notification of interim status."
+  ],
+  "approvalRequirements": [
+    "Tier 1 closure: Branch Banker / Agent.",
+    "Tier 2 closure: Branch Manager / Phone Supervisor.",
+    "Tier 3 formal written response: Compliance SME + Executive Relations Director."
+  ],
+  "escalationRules": [
+    "Complaints mentioning attorney representation, media exposure, or regulatory filing must be escalated to Tier 3 immediately.",
+    "Any allegation of employee misconduct or physical threat must be routed to Human Resources and Corporate Security."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: Synthetic UDAAP and Fair Banking regulations mandate comprehensive root-cause analysis on all complaint patterns.",
+    "All complaint audio recordings and correspondence must be archived for a synthetic 5-year retention period."
+  ]
+}

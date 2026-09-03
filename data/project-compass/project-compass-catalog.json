@@ -1,0 +1,232 @@
+{
+  "repositoryName": "Project Compass Synthetic SOP Repository",
+  "version": "1.0.0",
+  "lastUpdated": "2026-09-01",
+  "repositoryNotice": "DEMO DATA ONLY — These synthetic SOPs are created for the Cloud Run AI Challenge and must not be treated as actual banking policy.",
+  "totalPolicies": 10,
+  "totalActivePolicies": 10,
+  "totalVersions": 13,
+  "policies": [
+    {
+      "policyId": "PC-ACCOUNT-001",
+      "title": "Deposit Account Opening SOP",
+      "currentVersion": "1.0",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-01-15",
+      "nextReviewDate": "2027-01-14",
+      "policyOwner": "Retail Banking Operations Committee (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Contact Center Agent"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Standard operating procedure for verifying customer identity, collecting KYC documentation, and opening retail checking and savings accounts.",
+      "totalVersions": 1,
+      "availableVersions": [
+        "1.0"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-WIRE-001",
+      "title": "International Wire Transfer SOP",
+      "currentVersion": "4.2",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-08-01",
+      "nextReviewDate": "2027-07-31",
+      "policyOwner": "Global Payments & Wire Operations (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Operations Analyst",
+        "Compliance SME"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "End-to-end procedure for initiating, screening, dual-authorizing, and executing international outward and inward wire transfers.",
+      "totalVersions": 2,
+      "availableVersions": [
+        "4.1",
+        "4.2"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-POA-001",
+      "title": "Power of Attorney Handling SOP",
+      "currentVersion": "2.0",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-03-01",
+      "nextReviewDate": "2027-02-28",
+      "policyOwner": "Legal & Fiduciary Advisory Desk (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Operations Analyst",
+        "Compliance SME"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Procedures for receiving, logging, validating, and recording Power of Attorney and court-appointed legal guardianship appointments.",
+      "totalVersions": 1,
+      "availableVersions": [
+        "2.0"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-FEE-001",
+      "title": "Fee Waiver Approval SOP",
+      "currentVersion": "2.1",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-07-01",
+      "nextReviewDate": "2027-06-30",
+      "policyOwner": "Customer Care & Branch Governance (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Contact Center Agent",
+        "Contact Center Supervisor"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Tiered discretionary authority guidelines, mandatory reason code tagging, and supervisor approval matrices for retail fee adjustments.",
+      "totalVersions": 2,
+      "availableVersions": [
+        "2.0",
+        "2.1"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-ADDRESS-001",
+      "title": "Customer Address Change SOP",
+      "currentVersion": "1.2",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-04-10",
+      "nextReviewDate": "2027-04-09",
+      "policyOwner": "Client Data Governance & Fraud Prevention (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent",
+        "Contact Center Supervisor",
+        "Operations Analyst"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Standard verification requirements, document acceptability, and mandatory fraud prevention cooling periods for customer address modifications.",
+      "totalVersions": 1,
+      "availableVersions": [
+        "1.2"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-CARD-001",
+      "title": "Debit Card Replacement SOP",
+      "currentVersion": "3.0",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-05-15",
+      "nextReviewDate": "2027-05-14",
+      "policyOwner": "Card Services & Branch Operations (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Contact Center Agent"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Procedures for reporting lost, stolen, or compromised debit cards, instant in-branch card issuance, and standard secure delivery dispatch.",
+      "totalVersions": 1,
+      "availableVersions": [
+        "3.0"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-DORMANT-001",
+      "title": "Dormant Account Reactivation SOP",
+      "currentVersion": "1.5",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-02-20",
+      "nextReviewDate": "2027-02-19",
+      "policyOwner": "Deposit Operations & Unclaimed Property Desk (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Operations Analyst",
+        "Compliance SME"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Standard workflow for identifying dormant deposit accounts, customer outreach, in-person identity verification, and multi-sign-off reactivation.",
+      "totalVersions": 1,
+      "availableVersions": [
+        "1.5"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-JOINT-001",
+      "title": "Joint Account Ownership SOP",
+      "currentVersion": "2.2",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-06-15",
+      "nextReviewDate": "2027-06-14",
+      "policyOwner": "Retail Deposit Product Management (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Senior Branch Banker",
+        "Operations Analyst"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Operating rules for joint tenancy with rights of survivorship, tenancy in common, signature mandates, adding/removing owners, and dispute handling.",
+      "totalVersions": 1,
+      "availableVersions": [
+        "2.2"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-COMPLAINT-001",
+      "title": "Customer Complaint Escalation SOP",
+      "currentVersion": "3.1",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-05-01",
+      "nextReviewDate": "2027-04-30",
+      "policyOwner": "Customer Experience & Regulatory Relations (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent",
+        "Contact Center Supervisor",
+        "Operations Analyst",
+        "Compliance SME"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Three-tiered escalation matrix, strict SLA resolution windows, mandatory root-cause tracking, and regulatory complaint reporting workflows.",
+      "totalVersions": 1,
+      "availableVersions": [
+        "3.1"
+      ],
+      "demoData": true
+    },
+    {
+      "policyId": "PC-DIGITAL-001",
+      "title": "Digital Banking Enrollment SOP",
+      "currentVersion": "1.4",
+      "status": "ACTIVE",
+      "effectiveDate": "2026-06-01",
+      "nextReviewDate": "2027-05-31",
+      "policyOwner": "Digital Channels & Security Architecture (Synthetic)",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent",
+        "Contact Center Supervisor",
+        "Operations Analyst"
+      ],
+      "applicableRegion": "ALL-DEMO-REGIONS",
+      "summary": "Procedures for onboarding customers to online and mobile banking, mandatory multi-factor authentication, trusted device binding, and lock-out recovery.",
+      "totalVersions": 2,
+      "availableVersions": [
+        "1.3",
+        "1.4"
+      ],
+      "demoData": true
+    }
+  ]
+}

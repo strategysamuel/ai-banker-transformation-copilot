@@ -1,0 +1,6 @@
+{
+  "name": "AI Banker Transformation Copilot",
+  "description": "Enterprise Generative AI copilot empowering banking professionals in productivity, customer engagement, process optimization, and AI skill transformation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

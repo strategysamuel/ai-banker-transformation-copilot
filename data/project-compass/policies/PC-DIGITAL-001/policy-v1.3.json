@@ -1,0 +1,54 @@
+{
+  "policyId": "PC-DIGITAL-001",
+  "title": "Digital Banking Enrollment SOP",
+  "version": "1.3",
+  "status": "SUPERSEDED",
+  "effectiveDate": "2025-03-01",
+  "nextReviewDate": "2026-05-31",
+  "policyOwner": "Digital Channels & Security Architecture (Synthetic)",
+  "applicableRoles": [
+    "Branch Banker",
+    "Contact Center Agent"
+  ],
+  "applicableRegion": "ALL-DEMO-REGIONS",
+  "documentType": "Standard Operating Procedure",
+  "sourceType": "Synthetic Knowledge Base",
+  "sourceUri": "demo://project-compass/PC-DIGITAL-001/v1.3",
+  "supersedes": "1.2",
+  "demoData": true,
+  "summary": "[SUPERSEDED] Historical digital enrollment workflow utilizing basic SMS OTP alone without mandatory device binding.",
+  "purpose": "Provide digital registration procedures for retail clients under the legacy 2025 security baseline.",
+  "scope": "Branch and contact center digital enrollment assistance.",
+  "definitions": [
+    {
+      "term": "SMS OTP",
+      "definition": "Single-factor text message one-time passcode for online registration."
+    }
+  ],
+  "sections": [
+    {
+      "id": "section-1",
+      "sectionNumber": "1.0",
+      "title": "Registration Verification (Legacy Protocol)",
+      "citationId": "PC-DIGITAL-001-v1.3-section-1",
+      "sourceUri": "demo://project-compass/PC-DIGITAL-001/v1.3/section/1.0",
+      "content": "Banker verifies customer account number and sends SMS OTP to phone number on file to generate temporary credentials. No cryptographic device binding required.",
+      "applicableRoles": [
+        "Branch Banker",
+        "Contact Center Agent"
+      ]
+    }
+  ],
+  "exceptions": [
+    "None recorded in legacy version."
+  ],
+  "approvalRequirements": [
+    "Single banker enrollment assist."
+  ],
+  "escalationRules": [
+    "Escalate to Helpdesk if OTP delivery fails."
+  ],
+  "complianceNotes": [
+    "Demo governance guidance: SUPERSEDED ON 2026-06-01 BY VERSION 1.4."
+  ]
+}
