@@ -12,6 +12,7 @@ on:
       - 'scripts/test-phase3c-governance.ts'
       - 'package.json'
       - 'bun.lockb'
+      - 'bun.lock'
       - 'Dockerfile'
       - '.github/workflows/cloud-run-candidate.yml'
 
