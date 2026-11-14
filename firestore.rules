@@ -38,6 +38,13 @@ service cloud.firestore {
              (!('completedTasksCount' in data) || (data.completedTasksCount is number && data.completedTasksCount >= 0));
     }
 
+    // Client-created profiles must start with trusted baseline metrics.
+    function hasInitialProfileMetrics(data) {
+      return data.transformationScore == 15 &&
+             data.sessionsCount == 0 &&
+             data.completedTasksCount == 0;
+    }
+
     // A signed-in user may edit only presentation/profile fields.
     // Identity and server/application-managed metrics cannot be changed by profile edits.
     function onlyProfileFieldsChanged() {
@@ -95,6 +102,7 @@ service cloud.firestore {
       allow create: if isOwner(userId) &&
                        isValidId(userId) &&
                        isValidUserProfile(incoming()) &&
+                       hasInitialProfileMetrics(incoming()) &&
                        incoming().uid == userId;
       allow update: if isOwner(userId) &&
                        isValidId(userId) &&
