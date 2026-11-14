@@ -5,7 +5,7 @@ FROM oven/bun:1 AS builder
 WORKDIR /app
 
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install --no-save --no-frozen-lockfile
 
 COPY . .
 RUN bun run lint
@@ -14,7 +14,7 @@ RUN bun run build
 FROM oven/bun:1 AS production-deps
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN bun install --production --frozen-lockfile
+RUN bun install --production --no-save --no-frozen-lockfile
 
 FROM node:22-slim AS runner
 WORKDIR /app
