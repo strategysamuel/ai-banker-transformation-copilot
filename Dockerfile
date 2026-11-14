@@ -13,8 +13,10 @@ RUN bun run build
 
 FROM oven/bun:1 AS production-deps
 WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install --production --no-save --no-frozen-lockfile
+COPY package.json ./
+# Install only runtime dependencies; the full development lockfile includes
+# emulator-only test tooling that is intentionally excluded from this stage.
+RUN bun install --production --no-save
 
 FROM node:22-slim AS runner
 WORKDIR /app
