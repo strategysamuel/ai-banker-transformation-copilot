@@ -207,3 +207,17 @@ gcloud run deploy ai-banker-transformation-copilot \
 
 - **Synthetic SOP Corpus**: The knowledge base contains 10 synthetic SOPs designed for demonstration. Integration with enterprise document management systems (e.g. SharePoint, OpenText) is not included.
 - **Advisory Only**: The Copilot provides advisory and drafting assistance. It does not execute live core banking transactions, wire releases, or credit approvals.
+
+---
+
+## 12. Licence
+
+Copyright 2026 A Samuel Arun Kumar
+
+This project is licensed under the **Apache License, Version 2.0**.
+
+You may use, reproduce, modify, and distribute this software in accordance with the terms and conditions of the licence.
+
+See the [LICENSE](./LICENSE) file for the complete licence text.
+
+Third-party components and dependencies remain subject to their respective licences.
