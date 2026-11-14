@@ -109,8 +109,19 @@ jobs:
             exit 1
           fi
 
+          SERVICE_URL="$(gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project "${GCP_PROJECT_ID}" \
+            --region "${GCP_REGION}" \
+            --format='value(status.url)')"
+          if [ -z "${SERVICE_URL}" ]; then
+            echo "Could not resolve the canonical Cloud Run service URL for the identity token audience." >&2
+            exit 1
+          fi
+
           echo "url=${CANDIDATE_URL}" >> "${GITHUB_OUTPUT}"
+          ID_TOKEN="$(gcloud auth print-identity-token --audiences="${SERVICE_URL}")"
           curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
+            -H "Authorization: Bearer ${ID_TOKEN}" \
             "${CANDIDATE_URL}/api/health"
 
       - name: Publish candidate deployment summary
