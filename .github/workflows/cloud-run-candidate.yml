@@ -150,11 +150,11 @@ jobs:
               production.append({"revisionName":item["revisionName"],"percent":item["percent"]})
           if not production or sum(x["percent"] for x in production)!=100:
               raise SystemExit("Could not preserve a complete 100% production traffic allocation; refusing deployment.")
-          service.setdefault("spec",{})["traffic"]=production+[{"latestRevision":True,"percent":0,"tag":"github-candidate"}]
+          service.setdefault("spec",{})["traffic"]=production+[{"latestRevision":True,"percent":0,"tag":"cand"}]
           with open(path,"w") as f:
               yaml.safe_dump(service,f,sort_keys=False)
           print("Prepared candidate service spec; production allocation preserved:",production)
-          print("New latest revision will receive the github-candidate tag at 0% production traffic.")
+          print("New latest revision will receive the cand tag at 0% production traffic.")
           PY
           gcloud run services replace /tmp/candidate-service.yaml \
             --project "${GCP_PROJECT_ID}" \
@@ -170,9 +170,9 @@ jobs:
             --region "${GCP_REGION}" \
             --format=json > /tmp/cloud-run-service.json
 
-          CANDIDATE_URL="$(python -c 'import json; d=json.load(open("/tmp/cloud-run-service.json")); matches=[t for t in d.get("status",{}).get("traffic",[]) if t.get("tag")=="github-candidate"]; print(matches[0].get("url","") if matches else "")')"
+          CANDIDATE_URL="$(python -c 'import json; d=json.load(open("/tmp/cloud-run-service.json")); matches=[t for t in d.get("status",{}).get("traffic",[]) if t.get("tag")=="cand"]; print(matches[0].get("url","") if matches else "")')"
           if [ -z "${CANDIDATE_URL}" ]; then
-            echo "Could not resolve the github-candidate tagged URL." >&2
+            echo "Could not resolve the cand tagged URL." >&2
             exit 1
           fi
 
