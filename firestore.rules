@@ -7,7 +7,6 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
@@ -24,11 +23,6 @@ service cloud.firestore {
       return request.resource.data;
     }
 
-    function existing() {
-      return resource.data;
-    }
-
-    // User profile validation
     function isValidUserProfile(data) {
       return data.uid is string &&
              data.uid == request.auth.uid &&
@@ -44,7 +38,13 @@ service cloud.firestore {
              (!('completedTasksCount' in data) || (data.completedTasksCount is number && data.completedTasksCount >= 0));
     }
 
-    // Interaction validation
+    // A signed-in user may edit only presentation/profile fields.
+    // Identity and server/application-managed metrics cannot be changed by profile edits.
+    function onlyProfileFieldsChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['displayName', 'photoURL', 'role', 'department', 'institution', 'lastLoginAt', 'updatedAt']);
+    }
+
     function isValidInteraction(data) {
       return data.id is string &&
              data.id.size() <= 128 &&
@@ -57,7 +57,6 @@ service cloud.firestore {
              (!('summary' in data) || data.summary == null || (data.summary is string && data.summary.size() <= 2000));
     }
 
-    // Transformation assessment validation
     function isValidTransformationAssessment(data) {
       return data.id is string &&
              data.id.size() <= 128 &&
@@ -68,7 +67,6 @@ service cloud.firestore {
              data.overallScore <= 100;
     }
 
-    // Transformation plan validation
     function isValidTransformationPlan(data) {
       return data.id is string &&
              data.id.size() <= 128 &&
@@ -79,7 +77,6 @@ service cloud.firestore {
              (!('currentWeek' in data) || (data.currentWeek is number && data.currentWeek >= 1 && data.currentWeek <= 4));
     }
 
-    // Learning progress validation
     function isValidLearningProgress(data) {
       return data.id is string &&
              data.id.size() <= 128 &&
@@ -92,10 +89,9 @@ service cloud.firestore {
              (!('quizScore' in data) || (data.quizScore is number && data.quizScore >= 0 && data.quizScore <= 100));
     }
 
-    // Collection: /users/{userId}
     match /users/{userId} {
       allow get: if isOwner(userId) && isValidId(userId);
-      allow list: if false; // Strict PII protection: never allow user enumeration
+      allow list: if false;
       allow create: if isOwner(userId) &&
                        isValidId(userId) &&
                        isValidUserProfile(incoming()) &&
@@ -103,67 +99,39 @@ service cloud.firestore {
       allow update: if isOwner(userId) &&
                        isValidId(userId) &&
                        isValidUserProfile(incoming()) &&
-                       incoming().uid == userId;
-      allow delete: if false; // Profiles are permanent records
+                       incoming().uid == userId &&
+                       onlyProfileFieldsChanged();
+      allow delete: if false;
 
-      // Subcollection: /users/{userId}/interactions/{interactionId}
       match /interactions/{interactionId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-                         isValidId(interactionId) &&
-                         isValidInteraction(incoming()) &&
-                         incoming().userId == userId;
-        allow update: if isOwner(userId) &&
-                         isValidId(interactionId) &&
-                         isValidInteraction(incoming()) &&
-                         incoming().userId == userId;
+        allow create: if isOwner(userId) && isValidId(interactionId) && isValidInteraction(incoming()) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(interactionId) && isValidInteraction(incoming()) && incoming().userId == userId;
         allow delete: if isOwner(userId) && isValidId(interactionId);
       }
 
-      // Subcollection: /users/{userId}/transformationAssessments/{assessmentId}
       match /transformationAssessments/{assessmentId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-                         isValidId(assessmentId) &&
-                         isValidTransformationAssessment(incoming()) &&
-                         incoming().userId == userId;
-        allow update: if isOwner(userId) &&
-                         isValidId(assessmentId) &&
-                         isValidTransformationAssessment(incoming()) &&
-                         incoming().userId == userId;
+        allow create: if isOwner(userId) && isValidId(assessmentId) && isValidTransformationAssessment(incoming()) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(assessmentId) && isValidTransformationAssessment(incoming()) && incoming().userId == userId;
         allow delete: if isOwner(userId) && isValidId(assessmentId);
       }
 
-      // Subcollection: /users/{userId}/transformationPlans/{planId}
       match /transformationPlans/{planId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-                         isValidId(planId) &&
-                         isValidTransformationPlan(incoming()) &&
-                         incoming().userId == userId;
-        allow update: if isOwner(userId) &&
-                         isValidId(planId) &&
-                         isValidTransformationPlan(incoming()) &&
-                         incoming().userId == userId;
+        allow create: if isOwner(userId) && isValidId(planId) && isValidTransformationPlan(incoming()) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(planId) && isValidTransformationPlan(incoming()) && incoming().userId == userId;
         allow delete: if isOwner(userId) && isValidId(planId);
       }
 
-      // Subcollection: /users/{userId}/learningProgress/{topicId}
       match /learningProgress/{topicId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-                         isValidId(topicId) &&
-                         isValidLearningProgress(incoming()) &&
-                         incoming().userId == userId;
-        allow update: if isOwner(userId) &&
-                         isValidId(topicId) &&
-                         isValidLearningProgress(incoming()) &&
-                         incoming().userId == userId;
+        allow create: if isOwner(userId) && isValidId(topicId) && isValidLearningProgress(incoming()) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(topicId) && isValidLearningProgress(incoming()) && incoming().userId == userId;
         allow delete: if isOwner(userId) && isValidId(topicId);
       }
     }
 
-    // Health probe for Firestore connectivity tests
     match /test/{docId} {
       allow get: if true;
       allow list, write: if false;
