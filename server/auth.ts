@@ -17,6 +17,25 @@ const FIREBASE_JWKS = createRemoteJWKSet(
 const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
 const FIREBASE_ISSUER = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
 
+/** Validate Firebase-specific identity claims after cryptographic JWT verification. */
+export function isValidFirebaseIdentityClaims(payload: {
+  sub?: unknown;
+  auth_time?: unknown;
+  user_id?: unknown;
+}): payload is { sub: string; auth_time: number; user_id?: string } {
+  const uid = payload.sub;
+  const authTime = payload.auth_time;
+  return (
+    typeof uid === 'string' &&
+    uid.length > 0 &&
+    uid.length <= 128 &&
+    typeof authTime === 'number' &&
+    Number.isFinite(authTime) &&
+    authTime <= Math.floor(Date.now() / 1000) + 60 &&
+    (payload.user_id === undefined || payload.user_id === uid)
+  );
+}
+
 /**
  * Accepts Firebase Authentication ID tokens only.
  *
@@ -61,18 +80,7 @@ export async function authenticateFirebaseToken(
       requiredClaims: ['exp', 'iat', 'sub', 'auth_time'],
     });
 
-    const uid = payload.sub;
-    const authTime = payload.auth_time;
-
-    if (
-      typeof uid !== 'string' ||
-      uid.length === 0 ||
-      uid.length > 128 ||
-      typeof authTime !== 'number' ||
-      !Number.isFinite(authTime) ||
-      authTime > Math.floor(Date.now() / 1000) + 60 ||
-      (payload.user_id !== undefined && payload.user_id !== uid)
-    ) {
+    if (!isValidFirebaseIdentityClaims(payload)) {
       res.status(401).json({
         error: 'Unauthorized: Invalid or expired Firebase ID token.',
         code: 'AUTH_TOKEN_INVALID',
