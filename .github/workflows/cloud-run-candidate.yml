@@ -109,7 +109,7 @@ jobs:
           d=json.load(open("/tmp/cloud-run-before.json"))
           traffic=d.get("status",{}).get("traffic",[])
           production=[{"revisionName":t.get("revisionName"),"percent":t.get("percent",0)}
-                      for t in traffic if not t.get("tag") and t.get("percent",0)>0]
+                      for t in traffic if t.get("percent",0)>0]
           if not production:
               raise SystemExit("Could not identify current production traffic allocation; refusing candidate deployment.")
           json.dump(production, open("/tmp/production-traffic-before.json","w"), sort_keys=True)
@@ -144,7 +144,7 @@ jobs:
           containers[0]["image"]=os.environ["IMAGE_URI"]
           production=[]
           for item in live.get("status",{}).get("traffic",[]):
-              if item.get("tag") or not item.get("percent",0):
+              if not item.get("percent",0):
                   continue
               if not item.get("revisionName"):
                   raise SystemExit("Production traffic target is not pinned to a revision; refusing deployment.")
@@ -204,7 +204,7 @@ jobs:
           d=json.load(open("/tmp/cloud-run-after.json"))
           traffic=d.get("status",{}).get("traffic",[])
           production=[{"revisionName":t.get("revisionName"),"percent":t.get("percent",0)}
-                      for t in traffic if not t.get("tag") and t.get("percent",0)>0]
+                      for t in traffic if t.get("percent",0)>0]
           before=json.load(open("/tmp/production-traffic-before.json"))
           if sorted(production,key=lambda x:(x["revisionName"] or "",x["percent"])) != sorted(before,key=lambda x:(x["revisionName"] or "",x["percent"])):
               raise SystemExit(f"Production traffic changed unexpectedly. Before={before}; after={production}")
