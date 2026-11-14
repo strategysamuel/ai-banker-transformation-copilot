@@ -22,6 +22,7 @@ import {
   logGovernanceAuditRecord,
   getGovernanceAuditLogs,
   retrieveRelevantChunks,
+  getOrLoadVectorIndex,
   getVectorStoreSummary,
   buildPolicyChunks,
 } from '../server/projectCompassRag';
@@ -282,15 +283,27 @@ async function runPhase3CGovernanceTests() {
   assert(summary.embeddingModel === 'gemini-embedding-2', 'Vector index uses stable gemini-embedding-2');
   assert(summary.dimensions === 3072, 'Vectors have 3,072 dimensions');
 
-  // Out of scope query
-  const outOfScope = await retrieveRelevantChunks('Can you approve a $500,000 commercial real estate mortgage loan today?');
+  // Use a stored index vector as a deterministic query embedding so CI validates
+  // retrieval gates without requiring a live Gemini API key or network request.
+  const testIndex = await getOrLoadVectorIndex();
+  const wireVector = testIndex.chunks.find(
+    (chunk) => chunk.policyId === 'PC-WIRE-001' && chunk.status === 'ACTIVE' && chunk.embedding
+  )?.embedding;
+  assert(!!wireVector, 'Stored vector index contains an active wire-policy embedding');
+
+  // A zero vector deterministically falls below the similarity threshold.
+  const outOfScope = await retrieveRelevantChunks('offline negative-gate test', {
+    queryEmbedding: new Array(testIndex.embeddingDimension).fill(0),
+  });
   assert(
     outOfScope.status === 'policy_not_found',
     'Out of scope query triggers policy_not_found negative gate'
   );
 
-  // Valid policy query
-  const wireQuery = await retrieveRelevantChunks('What are the authorization thresholds for international wire transfers?');
+  // Exact stored policy vector must retrieve its own active policy chunk.
+  const wireQuery = wireVector
+    ? await retrieveRelevantChunks('offline wire-policy retrieval test', { queryEmbedding: wireVector })
+    : { status: 'policy_not_found' as const, chunks: [] };
   assert(
     wireQuery.status === 'grounded' && wireQuery.chunks.length > 0,
     'Valid policy query retrieves grounded chunks'
