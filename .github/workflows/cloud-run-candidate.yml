@@ -83,6 +83,25 @@ jobs:
           docker push "${IMAGE}"
           echo "uri=${IMAGE}" >> "${GITHUB_OUTPUT}"
 
+      - name: Snapshot current production traffic allocation
+        run: |
+          set -euo pipefail
+          gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project "${GCP_PROJECT_ID}" \
+            --region "${GCP_REGION}" \
+            --format=json > /tmp/cloud-run-before.json
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/cloud-run-before.json"))
+          traffic=d.get("status",{}).get("traffic",[])
+          production=[{"revisionName":t.get("revisionName"),"percent":t.get("percent",0)}
+                      for t in traffic if not t.get("tag") and t.get("percent",0)>0]
+          if not production:
+              raise SystemExit("Could not identify current production traffic allocation; refusing candidate deployment.")
+          json.dump(production, open("/tmp/production-traffic-before.json","w"), sort_keys=True)
+          print("Production traffic before candidate:", production)
+          PY
+
       - name: Deploy isolated candidate revision without shifting production traffic
         env:
           IMAGE_URI: ${{ steps.image.outputs.uri }}
@@ -114,7 +133,37 @@ jobs:
 
           echo "url=${CANDIDATE_URL}" >> "${GITHUB_OUTPUT}"
           curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
-            "${CANDIDATE_URL}/api/health"
+            "${CANDIDATE_URL}/api/health" -o /tmp/candidate-health.json
+          python - <<'PY'
+          import json
+          health=json.load(open("/tmp/candidate-health.json"))
+          expected={
+            "status":"healthy",
+            "service":"ai-banker-transformation-copilot",
+            "env":"production",
+            "phase":"Phase 3D - Project Compass Citation Integrity & Governance Validation Live",
+          }
+          for key,value in expected.items():
+              if health.get(key)!=value:
+                  raise SystemExit(f"Candidate health mismatch for {key}: expected {value!r}, got {health.get(key)!r}")
+          print("Candidate health validated:", expected)
+          PY
+
+          gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project "${GCP_PROJECT_ID}" \
+            --region "${GCP_REGION}" \
+            --format=json > /tmp/cloud-run-after.json
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/cloud-run-after.json"))
+          traffic=d.get("status",{}).get("traffic",[])
+          production=[{"revisionName":t.get("revisionName"),"percent":t.get("percent",0)}
+                      for t in traffic if not t.get("tag") and t.get("percent",0)>0]
+          before=json.load(open("/tmp/production-traffic-before.json"))
+          if sorted(production,key=lambda x:(x["revisionName"] or "",x["percent"])) != sorted(before,key=lambda x:(x["revisionName"] or "",x["percent"])):
+              raise SystemExit(f"Production traffic changed unexpectedly. Before={before}; after={production}")
+          print("Production traffic allocation unchanged:", production)
+          PY
 
       - name: Publish candidate deployment summary
         if: always()
