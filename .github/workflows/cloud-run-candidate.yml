@@ -9,6 +9,7 @@ on:
       - 'server.ts'
       - 'server/**'
       - 'src/data/projectCompassData.ts'
+      - 'firebase-applet-config.json'
       - 'scripts/test-phase3c-governance.ts'
       - 'package.json'
       - 'bun.lockb'
