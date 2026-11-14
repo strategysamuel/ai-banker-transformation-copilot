@@ -43,6 +43,9 @@ jobs:
       - name: Run Firebase authentication tests
         run: bun run test:auth
 
+      - name: Run Project Compass governance tests
+        run: bun run test:project-compass-governance
+
       - name: Set up Java for Firestore emulator
         uses: actions/setup-java@v4
         with:
