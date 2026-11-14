@@ -73,9 +73,13 @@ Follow the responsible disclosure process described in `SECURITY.md`.
 
 ## 7. Licence
 
-By contributing, you agree that your contributions will be licensed under the Apache License, Version 2.0, subject to your rights to submit those contributions.
+This project is licensed under the Apache License, Version 2.0.
 
-See the repository's `LICENSE` file.
+By intentionally submitting a contribution for inclusion in this project, you agree that your contribution will be licensed under the terms and conditions of the Apache License, Version 2.0, as described in Section 5 of that licence.
+
+You retain ownership of your original contributions.
+
+See the repository's `LICENSE` file for the complete licence terms.
 
 ## 8. Community Standards
 
