@@ -89,10 +89,10 @@ async function runPhase3CGovernanceTests() {
     'PC-WIRE-001 is classified as HIGH_OPERATIONAL_RISK requiring verification'
   );
 
-  const poaRisk = evaluatePolicyRisk('PC-POA-001', 'Power of Attorney Handling SOP');
+  const poaLegacyRisk = evaluatePolicyRisk('PC-POA-003', 'Power of Attorney Verification & Validation SOP');
   assert(
-    poaRisk.isHighRisk && poaRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
-    'PC-POA-001 (the live POA SOP) is classified as HIGH_OPERATIONAL_RISK requiring verification'
+    poaLegacyRisk.isHighRisk && poaLegacyRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
+    'PC-POA-003 legacy POA policy is classified as HIGH_OPERATIONAL_RISK requiring verification'
   );
 
   const poaRisk = evaluatePolicyRisk('PC-POA-001', 'Power of Attorney Handling SOP');
