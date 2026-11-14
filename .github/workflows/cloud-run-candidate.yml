@@ -2,6 +2,18 @@ name: Build and deploy Cloud Run candidate
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server.ts'
+      - 'server/**'
+      - 'src/data/projectCompassData.ts'
+      - 'scripts/test-phase3c-governance.ts'
+      - 'package.json'
+      - 'bun.lockb'
+      - 'Dockerfile'
+      - '.github/workflows/cloud-run-candidate.yml'
 
 permissions:
   contents: read
