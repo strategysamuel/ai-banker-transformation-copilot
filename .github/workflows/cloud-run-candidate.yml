@@ -83,31 +83,6 @@ jobs:
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
 
-      - name: Authorize Cloud Run domains for Firebase Authentication
-        run: |
-          set -euo pipefail
-          TOKEN="$(gcloud auth print-access-token)"
-          CONFIG_URL="https://identitytoolkit.googleapis.com/admin/v2/projects/${GCP_PROJECT_ID}/config"
-          curl --fail --silent --show-error -H "Authorization: Bearer ${TOKEN}" "${CONFIG_URL}" -o /tmp/firebase-auth-config.json
-          python - <<'PY'
-          import json
-          config=json.load(open("/tmp/firebase-auth-config.json"))
-          domains=config.get("authorizedDomains", [])
-          required=["cand---ai-banker-transformation-copilot-y25s3neq3a-uw.a.run.app","ai-banker-transformation-copilot-y25s3neq3a-uw.a.run.app"]
-          merged=list(dict.fromkeys(domains+required))
-          json.dump({"authorizedDomains":merged},open("/tmp/firebase-auth-domains-update.json","w"))
-          print("Existing authorized domains preserved; adding required Cloud Run domains:",required)
-          PY
-          curl --fail --silent --show-error -X PATCH -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" "${CONFIG_URL}?updateMask=authorizedDomains" --data-binary @/tmp/firebase-auth-domains-update.json -o /tmp/firebase-auth-config-updated.json
-          python - <<'PY'
-          import json
-          domains=json.load(open("/tmp/firebase-auth-config-updated.json")).get("authorizedDomains",[])
-          required=["cand---ai-banker-transformation-copilot-y25s3neq3a-uw.a.run.app","ai-banker-transformation-copilot-y25s3neq3a-uw.a.run.app"]
-          missing=[d for d in required if d not in domains]
-          if missing: raise SystemExit("Firebase did not confirm authorized domains: "+", ".join(missing))
-          print("Firebase authorized domains verified:",required)
-          PY
-
       - name: Configure Docker authentication
         run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
 
