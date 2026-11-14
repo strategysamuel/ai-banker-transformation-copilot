@@ -47,7 +47,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install locked dependencies
-        run: bun install --no-save
+        run: bun install --no-save --no-frozen-lockfile
 
       - name: Type-check
         run: bun run lint
