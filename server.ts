@@ -118,7 +118,7 @@ async function startServer() {
         }
 
         // 3. Retrieve relevant chunks using Vector Similarity Search (Active policies only)
-        console.log(`[Project Compass API] [${requestId}] Performing vector retrieval for user ${userId}: "${trimmedQuery.substring(0, 80)}..."`);
+        console.log(`[Project Compass API] [${requestId}] Performing vector retrieval for authenticated user ${userId}.`);
         const retrieval = await retrieveRelevantChunks(trimmedQuery, {
           userRole: 'Branch Banker',
           userRegion: 'ALL-DEMO-REGIONS',
@@ -133,7 +133,7 @@ async function startServer() {
           logGovernanceAuditRecord({
             authenticatedUid: userId,
             queryId: requestId,
-            query: trimmedQuery,
+            query: '[REDACTED FOR PRIVACY]',
             retrievedChunkIds: [],
             policyIds: [],
             policyVersions: [],
@@ -168,7 +168,7 @@ async function startServer() {
           logGovernanceAuditRecord({
             authenticatedUid: userId,
             queryId: requestId,
-            query: trimmedQuery,
+            query: '[REDACTED FOR PRIVACY]',
             retrievedChunkIds: retrieval.chunks.map((c) => c.chunkId),
             policyIds: Array.from(new Set(retrieval.chunks.map((c) => c.policyId))),
             policyVersions: Array.from(new Set(retrieval.chunks.map((c) => c.version))),
@@ -221,7 +221,7 @@ async function startServer() {
         logGovernanceAuditRecord({
           authenticatedUid: userId,
           queryId: requestId,
-          query: trimmedQuery,
+          query: '[REDACTED FOR PRIVACY]',
           retrievedChunkIds: retrieval.chunks.map((c) => c.chunkId),
           policyIds: Array.from(new Set(retrieval.chunks.map((c) => c.policyId))),
           policyVersions: Array.from(new Set(retrieval.chunks.map((c) => c.version))),
