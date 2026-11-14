@@ -1,0 +1,175 @@
+name: Promote Cloud Run candidate to production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloud-run-production-promotion
+  cancel-in-progress: false
+
+env:
+  GCP_PROJECT_ID: gen-lang-client-0113378314
+  GCP_REGION: us-west1
+  CLOUD_RUN_SERVICE: ai-banker-transformation-copilot
+
+jobs:
+  approve-production:
+    name: Approve production promotion
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Confirm approval gate
+        run: |
+          echo "Production promotion approved by the configured GitHub environment reviewer."
+          echo "No cloud credentials or production changes are performed in this job."
+
+  promote-candidate:
+    name: Promote verified candidate revision
+    needs: approve-production
+    runs-on: ubuntu-latest
+    environment: production-candidate
+    steps:
+      - name: Authenticate to Google Cloud using Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Verify candidate and snapshot current production allocation
+        id: verify
+        run: |
+          set -euo pipefail
+          gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
+            --format=json > /tmp/service-before.json
+
+          python - <<'PY'
+          import json, os
+          d=json.load(open("/tmp/service-before.json"))
+          traffic=d.get("status",{}).get("traffic",[])
+          candidate=[t for t in traffic if t.get("tag")=="cand"]
+          if len(candidate)!=1 or not candidate[0].get("revisionName"):
+              raise SystemExit("Expected exactly one cand-tagged revision. Refusing promotion.")
+          c=candidate[0]
+          revision=c["revisionName"]
+          url=c.get("url","")
+          if not url:
+              raise SystemExit("Candidate URL is missing. Refusing promotion.")
+          production=[t for t in traffic if not t.get("tag") and t.get("percent",0)>0]
+          if not production or sum(t.get("percent",0) for t in production)!=100:
+              raise SystemExit("Current production traffic is not a complete 100% allocation. Refusing promotion.")
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              f.write(f"revision={revision}\n")
+              f.write(f"url={url}\n")
+          json.dump(production,open("/tmp/production-before.json","w"))
+          print("Candidate revision:",revision)
+          print("Candidate URL:",url)
+          print("Existing production allocation:",production)
+          PY
+
+          gcloud run revisions describe "${{ steps.verify.outputs.revision }}" \
+            --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
+            --format=json > /tmp/candidate-revision.json
+
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/candidate-revision.json"))
+          conditions=d.get("status",{}).get("conditions",[])
+          ready=next((c.get("status") for c in conditions if c.get("type")=="Ready"),None)
+          if ready!="True":
+              raise SystemExit(f"Candidate revision is not Ready: {ready}")
+          print("Candidate revision Ready=True")
+          PY
+
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
+            "${{ steps.verify.outputs.url }}/api/health" -o /tmp/candidate-health.json
+          python - <<'PY'
+          import json
+          h=json.load(open("/tmp/candidate-health.json"))
+          expected={
+            "status":"healthy",
+            "service":"ai-banker-transformation-copilot",
+            "env":"production",
+            "phase":"Phase 3D - Project Compass Citation Integrity & Governance Validation Live",
+          }
+          for k,v in expected.items():
+              if h.get(k)!=v:
+                  raise SystemExit(f"Candidate health mismatch for {k}: expected {v!r}, got {h.get(k)!r}")
+          print("Candidate health validated:",expected)
+          PY
+
+      - name: Promote candidate revision to 100% production traffic
+        id: promote
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic "${CLOUD_RUN_SERVICE}" \
+            --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
+            --to-revisions="${{ steps.verify.outputs.revision }}=100" --quiet
+
+      - name: Verify production and automatically restore prior traffic on failure
+        run: |
+          set -euo pipefail
+          rollback() {
+            echo "Production verification failed; restoring the previous traffic allocation."
+            PREVIOUS="$(python - <<'PY'
+          import json
+          d=json.load(open("/tmp/production-before.json"))
+          print(",".join(f"{x['revisionName']}={x['percent']}" for x in d))
+          PY
+          )"
+            gcloud run services update-traffic "${CLOUD_RUN_SERVICE}" \
+              --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
+              --to-revisions="${PREVIOUS}" --quiet
+          }
+          if ! curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
+            "https://${CLOUD_RUN_SERVICE}-y25s3neq3a-uw.a.run.app/api/health" -o /tmp/production-health.json; then
+            rollback
+            exit 1
+          fi
+          if ! python - <<'PY'
+          import json
+          h=json.load(open("/tmp/production-health.json"))
+          if h.get("status")!="healthy" or h.get("service")!="ai-banker-transformation-copilot":
+              raise SystemExit("Production health validation failed.")
+          print("Production health validated:",h)
+          PY
+          then
+            rollback
+            exit 1
+          fi
+
+          gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
+            --format=json > /tmp/service-after.json
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/service-after.json"))
+          traffic=d.get("status",{}).get("traffic",[])
+          prod=[t for t in traffic if not t.get("tag") and t.get("percent",0)>0]
+          if len(prod)!=1 or prod[0].get("revisionName")!="${{ steps.verify.outputs.revision }}" or prod[0].get("percent")!=100:
+              raise SystemExit(f"Unexpected production traffic after promotion: {prod}")
+          print("Verified production traffic:",prod)
+          PY
+
+      - name: Publish production promotion summary
+        if: always()
+        run: |
+          {
+            echo "## Cloud Run production promotion"
+            echo "- Project: ${GCP_PROJECT_ID}"
+            echo "- Region: ${GCP_REGION}"
+            echo "- Service: ${CLOUD_RUN_SERVICE}"
+            echo "- Candidate revision: ${{ steps.verify.outputs.revision }}"
+            echo "- Candidate URL: ${{ steps.verify.outputs.url }}"
+            echo "- Production promotion requires the protected production environment approval."
+            echo "- If post-promotion health verification fails, the workflow restores the previous traffic allocation."
+          } >> "${GITHUB_STEP_SUMMARY}"
