@@ -46,6 +46,21 @@ after(async () => {
   await testEnv?.cleanup();
 });
 
+test('new user can create a profile with baseline metrics', async () => {
+  const db = testEnv.authenticatedContext('charlie').firestore();
+  await assertSucceeds(setDoc(doc(db, 'users/charlie'), profile('charlie')));
+});
+
+test('new user cannot initialize inflated application metrics', async () => {
+  const db = testEnv.authenticatedContext('dave').firestore();
+  await assertFails(setDoc(doc(db, 'users/dave'), {
+    ...profile('dave'),
+    transformationScore: 100,
+    sessionsCount: 500,
+    completedTasksCount: 500,
+  }));
+});
+
 test('owner can read their own profile', async () => {
   const db = testEnv.authenticatedContext('alice').firestore();
   await assertSucceeds(getDoc(doc(db, 'users/alice')));
