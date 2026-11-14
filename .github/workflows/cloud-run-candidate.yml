@@ -120,15 +120,16 @@ jobs:
           IMAGE_URI: ${{ steps.image.outputs.uri }}
         run: |
           set -euo pipefail
-          # Remove the incompatible source-build annotation using an exported
-          # service spec. Explicitly pin current production traffic to its
-          # existing revisions during the metadata cleanup operation.
+          # Export the current service, replace the source-build placeholder
+          # with the immutable container image, and remove source metadata.
+          # Add a zero-percent tagged target for the newly-created revision;
+          # retain the existing production revision at 100%.
           gcloud run services describe "${CLOUD_RUN_SERVICE}" \
             --project "${GCP_PROJECT_ID}" \
             --region "${GCP_REGION}" \
             --format=export > /tmp/candidate-service.yaml
           python - <<'PY'
-          import json, yaml
+          import json, os, yaml
           path="/tmp/candidate-service.yaml"
           live=json.load(open("/tmp/cloud-run-before.json"))
           with open(path) as f:
@@ -136,36 +137,28 @@ jobs:
           service.setdefault("metadata",{}).setdefault("annotations",{}).pop("run.googleapis.com/sources",None)
           template=service.setdefault("spec",{}).setdefault("template",{})
           template.setdefault("metadata",{}).setdefault("annotations",{}).pop("run.googleapis.com/sources",None)
-          # The exported service spec may omit traffic. Preserve the exact
-          # pre-deployment production revision allocation explicitly.
-          traffic=[]
+          containers=template.get("spec",{}).get("containers",[])
+          if not containers:
+              raise SystemExit("Cloud Run service export has no container; refusing deployment.")
+          containers[0]["image"]=os.environ["IMAGE_URI"]
+          production=[]
           for item in live.get("status",{}).get("traffic",[]):
-              if item.get("tag"):
+              if item.get("tag") or not item.get("percent",0):
                   continue
-              entry={}
-              if item.get("revisionName"): entry["revisionName"]=item["revisionName"]
-              if item.get("percent") is not None: entry["percent"]=item["percent"]
-              if item.get("tag"): entry["tag"]=item["tag"]
-              if entry: traffic.append(entry)
-          if not traffic or sum(x.get("percent",0) for x in traffic)!=100:
-              raise SystemExit("Could not preserve a complete 100% production traffic allocation; refusing replacement.")
-          service.setdefault("spec",{})["traffic"]=traffic
+              if not item.get("revisionName"):
+                  raise SystemExit("Production traffic target is not pinned to a revision; refusing deployment.")
+              production.append({"revisionName":item["revisionName"],"percent":item["percent"]})
+          if not production or sum(x["percent"] for x in production)!=100:
+              raise SystemExit("Could not preserve a complete 100% production traffic allocation; refusing deployment.")
+          service.setdefault("spec",{})["traffic"]=production+[{"latestRevision":True,"percent":0,"tag":"github-candidate"}]
           with open(path,"w") as f:
               yaml.safe_dump(service,f,sort_keys=False)
-          print("Prepared metadata-cleanup service YAML with production traffic pinned:",traffic)
+          print("Prepared candidate service spec; production allocation preserved:",production)
+          print("New latest revision will receive the github-candidate tag at 0% production traffic.")
           PY
           gcloud run services replace /tmp/candidate-service.yaml \
             --project "${GCP_PROJECT_ID}" \
             --region "${GCP_REGION}" \
-            --quiet
-
-          # Deploy the immutable image as a tagged, zero-production-traffic revision.
-          gcloud run services update "${CLOUD_RUN_SERVICE}" \
-            --project "${GCP_PROJECT_ID}" \
-            --region "${GCP_REGION}" \
-            --image "${IMAGE_URI}" \
-            --no-traffic \
-            --tag github-candidate \
             --quiet
 
       - name: Resolve candidate URL and smoke-test health endpoint
