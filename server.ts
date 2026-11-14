@@ -52,7 +52,7 @@ async function startServer() {
       env: process.env.NODE_ENV || 'development',
       challengeLabel: 'cloud-run-ai-challenge',
       port: PORT,
-      phase: 'Phase 3C - Project Compass Governance Guardrails & Policy Version Safety Live'
+      phase: 'Phase 3D - Project Compass Citation Integrity & Governance Validation Live'
     });
   });
 
