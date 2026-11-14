@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { NextFunction, Response } from 'express';
-import { authenticateFirebaseToken, type AuthenticatedRequest } from './auth';
+import { authenticateFirebaseToken, isValidFirebaseIdentityClaims, type AuthenticatedRequest } from './auth';
 
 function makeResponse() {
   const result: { statusCode?: number; body?: unknown } = {};
@@ -59,7 +59,6 @@ test('rejects oversized bearer tokens before verification', async () => {
   assert.equal(nextCalled, false);
 });
 
-import { isValidFirebaseIdentityClaims } from './auth';
 
 test('accepts a valid Firebase identity claim set', () => {
   const now = Math.floor(Date.now() / 1000);
