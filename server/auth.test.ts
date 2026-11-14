@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { generateKeyPair } from 'node:crypto';
+import { generateKeyPairSync } from 'node:crypto';
 import { test } from 'node:test';
 import type { NextFunction, Response } from 'express';
 import { jwtVerify, SignJWT } from 'jose';
@@ -14,8 +14,8 @@ const TEST_PROJECT_ID = 'unit-test-firebase-project';
 const TEST_ISSUER = `https://securetoken.google.com/${TEST_PROJECT_ID}`;
 const now = () => Math.floor(Date.now() / 1000);
 
-const keyPairPromise = generateKeyPair('rsa', { modulusLength: 2048 });
-const otherKeyPairPromise = generateKeyPair('rsa', { modulusLength: 2048 });
+const keyPair = generateKeyPairSync('rsa', { modulusLength: 2048 });
+const otherKeyPair = generateKeyPairSync('rsa', { modulusLength: 2048 });
 
 function makeResponse() {
   const result: { statusCode?: number; body?: unknown } = {};
@@ -40,7 +40,7 @@ async function makeSignedToken(overrides: {
   userId?: string;
   expiration?: string;
 } = {}) {
-  const { privateKey } = await keyPairPromise;
+  const { privateKey } = keyPair;
   const issuedAt = now();
   const subject = overrides.subject ?? 'firebase-user-123';
   return new SignJWT({
@@ -58,7 +58,7 @@ async function makeSignedToken(overrides: {
 
 function makeTestMiddleware() {
   return createFirebaseAuthMiddleware(async (token) => {
-    const { publicKey } = await keyPairPromise;
+    const { publicKey } = keyPair;
     const { payload } = await jwtVerify(token, publicKey, {
       algorithms: ['RS256'],
       issuer: TEST_ISSUER,
@@ -116,7 +116,7 @@ test('rejects a token signed by a different RSA key', async () => {
   const req = { headers: { authorization: `Bearer ${token}` } } as AuthenticatedRequest;
   const { res, result } = makeResponse();
   const middleware = createFirebaseAuthMiddleware(async (value) => {
-    const { publicKey } = await otherKeyPairPromise;
+    const { publicKey } = otherKeyPair;
     const { payload } = await jwtVerify(value, publicKey, {
       algorithms: ['RS256'], issuer: TEST_ISSUER, audience: TEST_PROJECT_ID,
     });
