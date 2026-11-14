@@ -35,3 +35,7 @@ jobs:
         run: npm install
       - name: Run Firestore emulator security tests
         run: npx --yes firebase-tools@14 emulators:exec --only firestore --project demo-ai-banker "npm run test:firestore-rules"
+      - name: Run TypeScript checks
+        run: npm run lint
+      - name: Build application
+        run: npm run build
