@@ -1,0 +1,35 @@
+name: Security and build checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, security/strict-firebase-auth]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Type-check
+        run: npm run lint
+
+      - name: Run Firebase authentication tests
+        run: npm run test:auth
+
+      - name: Build application
+        run: npm run build
