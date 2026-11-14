@@ -89,7 +89,7 @@ export async function authenticateFirebaseToken(
     }
 
     req.user = {
-      uid,
+      uid: payload.sub,
       ...(typeof payload.email === 'string' ? { email: payload.email } : {}),
     };
 
