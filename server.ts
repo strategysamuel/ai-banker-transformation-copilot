@@ -217,6 +217,19 @@ async function startServer() {
         const citationValidation = validateAndAlignCitations(result.output.citations, retrieval.chunks);
         const finalCitations = citationValidation.citations;
 
+        // Fail closed: never label an answer grounded when the model omitted citations
+        // or submitted any citation that could not be matched to retrieved evidence.
+        if (!citationValidation.valid) {
+          console.error(
+            `[Project Compass API] [${requestId}] Citation validation failed: ${citationValidation.rejectedCitations.length} rejected citation(s).`
+          );
+          res.status(502).json({
+            error: 'The generated answer did not pass citation validation. Please retry or consult the authorized policy repository.',
+            code: 'CITATION_VALIDATION_FAILED',
+          });
+          return;
+        }
+
         // 9. Governance Audit Logging (No tokens, passwords, or secrets logged)
         logGovernanceAuditRecord({
           authenticatedUid: userId,

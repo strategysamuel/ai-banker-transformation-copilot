@@ -30,5 +30,8 @@ jobs:
       - name: Run Firebase authentication tests
         run: npm run test:auth
 
+      - name: Run Project Compass governance tests
+        run: npm run test:project-compass-governance
+
       - name: Build application
         run: npm run build

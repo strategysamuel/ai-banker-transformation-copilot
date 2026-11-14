@@ -22,6 +22,7 @@ import {
   logGovernanceAuditRecord,
   getGovernanceAuditLogs,
   retrieveRelevantChunks,
+  getOrLoadVectorIndex,
   getVectorStoreSummary,
   buildPolicyChunks,
 } from '../server/projectCompassRag';
@@ -89,12 +90,17 @@ async function runPhase3CGovernanceTests() {
     'PC-WIRE-001 is classified as HIGH_OPERATIONAL_RISK requiring verification'
   );
 
-  const poaRisk = evaluatePolicyRisk('PC-POA-003', 'Power of Attorney Verification & Validation SOP');
+  const poaLegacyRisk = evaluatePolicyRisk('PC-POA-003', 'Power of Attorney Verification & Validation SOP');
   assert(
-    poaRisk.isHighRisk && poaRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
-    'PC-POA-003 is classified as HIGH_OPERATIONAL_RISK requiring verification'
+    poaLegacyRisk.isHighRisk && poaLegacyRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
+    'PC-POA-003 legacy POA policy is classified as HIGH_OPERATIONAL_RISK requiring verification'
   );
 
+  const poaRisk = evaluatePolicyRisk('PC-POA-001', 'Power of Attorney Handling SOP');
+  assert(
+    poaRisk.isHighRisk && poaRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
+    'PC-POA-001 (the live POA SOP) is classified as HIGH_OPERATIONAL_RISK requiring verification'
+  );
   const feeRisk = evaluatePolicyRisk('PC-FEE-004', 'Retail Service Fee Waiver & Authorization SOP');
   assert(
     feeRisk.isHighRisk && feeRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
@@ -151,16 +157,16 @@ async function runPhase3CGovernanceTests() {
   // Test Group 4: Effective Date & Scheduled Review Date Safety
   // -------------------------------------------------------------
   console.log('\n--- Test Group 4: Effective Date & Scheduled Review Safety ---');
-  const pastEval = evaluateReviewDate('2025-01-01');
+  const pastEval = evaluateReviewDate('2025-01-01', '2026-09-01');
   assert(pastEval.type === 'PAST_REVIEW', 'Past review date evaluated as PAST_REVIEW warning');
 
-  const futureEval = evaluateReviewDate('2028-01-01');
+  const futureEval = evaluateReviewDate('2028-01-01', '2026-09-01');
   assert(futureEval.type === 'CURRENT', 'Future review date evaluated as CURRENT');
 
   // Approaching review (e.g. 30 days from simulated date)
   const simulatedNow = new Date('2026-09-01T00:00:00Z');
   const approachingDate = new Date(simulatedNow.getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const approachingEval = evaluateReviewDate(approachingDate);
+  const approachingEval = evaluateReviewDate(approachingDate, '2026-09-01');
   assert(approachingEval.type === 'APPROACHING_REVIEW', 'Date within 90 days evaluated as APPROACHING_REVIEW');
 
   // -------------------------------------------------------------
@@ -225,6 +231,20 @@ async function runPhase3CGovernanceTests() {
     'Fabricated citations stripped and replaced with genuine retrieved SOP chunk'
   );
 
+  const valResult3 = validateAndAlignCitations(
+    [...validRawCitations, ...fabricatedCitations],
+    mockRetrieved
+  );
+  assert(
+    !valResult3.valid && valResult3.rejectedCitations.length === 1,
+    'Mixed valid and fabricated citations fail closed'
+  );
+  const valResult4 = validateAndAlignCitations([], mockRetrieved);
+  assert(
+    !valResult4.valid,
+    'Missing model citations do not pass citation validation'
+  );
+
   // -------------------------------------------------------------
   // Test Group 6: Governance Audit Logging (Security & Zero Secrets)
   // -------------------------------------------------------------
@@ -263,15 +283,27 @@ async function runPhase3CGovernanceTests() {
   assert(summary.embeddingModel === 'gemini-embedding-2', 'Vector index uses stable gemini-embedding-2');
   assert(summary.dimensions === 3072, 'Vectors have 3,072 dimensions');
 
-  // Out of scope query
-  const outOfScope = await retrieveRelevantChunks('Can you approve a $500,000 commercial real estate mortgage loan today?');
+  // Use a stored index vector as a deterministic query embedding so CI validates
+  // retrieval gates without requiring a live Gemini API key or network request.
+  const testIndex = await getOrLoadVectorIndex();
+  const wireVector = testIndex.chunks.find(
+    (chunk) => chunk.policyId === 'PC-WIRE-001' && chunk.status === 'ACTIVE' && chunk.embedding
+  )?.embedding;
+  assert(!!wireVector, 'Stored vector index contains an active wire-policy embedding');
+
+  // A zero vector deterministically falls below the similarity threshold.
+  const outOfScope = await retrieveRelevantChunks('offline negative-gate test', {
+    queryEmbedding: new Array(testIndex.embeddingDimension).fill(0),
+  });
   assert(
     outOfScope.status === 'policy_not_found',
     'Out of scope query triggers policy_not_found negative gate'
   );
 
-  // Valid policy query
-  const wireQuery = await retrieveRelevantChunks('What are the authorization thresholds for international wire transfers?');
+  // Exact stored policy vector must retrieve its own active policy chunk.
+  const wireQuery = wireVector
+    ? await retrieveRelevantChunks('offline wire-policy retrieval test', { queryEmbedding: wireVector })
+    : { status: 'policy_not_found' as const, chunks: [] };
   assert(
     wireQuery.status === 'grounded' && wireQuery.chunks.length > 0,
     'Valid policy query retrieves grounded chunks'

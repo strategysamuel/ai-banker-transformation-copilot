@@ -264,6 +264,8 @@ export interface SearchOptions {
   userRegion?: string;
   topK?: number;
   minSimilarity?: number;
+  /** Deterministic embedding injection for offline retrieval tests; production callers should omit. */
+  queryEmbedding?: number[];
 }
 
 /**
@@ -294,7 +296,7 @@ export async function retrieveRelevantChunks(
   const userRegion = options.userRegion || 'ALL-DEMO-REGIONS';
 
   // Generate query embedding using the configured EMBEDDING_MODEL
-  const queryEmbedding = await generateTextEmbedding(query);
+  const queryEmbedding = options.queryEmbedding ?? await generateTextEmbedding(query);
 
   // Model & Dimensionality safety check: Prevent comparing query vector against mismatched index
   if (index.embeddingModel !== EMBEDDING_MODEL) {
@@ -460,7 +462,7 @@ export function evaluatePolicyRisk(
  */
 export function evaluateReviewDate(
   nextReviewDateStr?: string,
-  referenceDateStr = '2026-09-01'
+  referenceDateStr = new Date().toISOString().slice(0, 10)
 ): {
   type: 'CURRENT' | 'APPROACHING_REVIEW' | 'PAST_REVIEW';
   message: string;
@@ -476,8 +478,9 @@ export function evaluateReviewDate(
     };
   }
 
-  const reviewDate = new Date(nextReviewDateStr);
-  const refDate = new Date(referenceDateStr);
+  // Parse date-only policy values in UTC to avoid timezone-dependent day shifts.
+  const reviewDate = new Date(`${nextReviewDateStr.slice(0, 10)}T00:00:00.000Z`);
+  const refDate = new Date(`${referenceDateStr.slice(0, 10)}T00:00:00.000Z`);
 
   if (isNaN(reviewDate.getTime()) || isNaN(refDate.getTime())) {
     return {
@@ -683,7 +686,10 @@ export function validateAndAlignCitations(
     ];
   }
 
-  const isAllValid = deduplicated.length > 0 && rejectedCitations.length === 0;
+  // A fallback citation may be useful for display/debugging, but it must not turn
+  // an empty or partially fabricated model citation set into a validated result.
+  const hasSubmittedCitations = Array.isArray(rawCitations) && rawCitations.length > 0;
+  const isAllValid = hasSubmittedCitations && deduplicated.length > 0 && rejectedCitations.length === 0;
 
   return {
     valid: isAllValid,
