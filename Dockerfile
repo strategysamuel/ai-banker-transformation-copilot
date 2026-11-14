@@ -1,39 +1,31 @@
-# Production Multi-Stage Dockerfile for Cloud Run
-# AI Banker Transformation Copilot (Google Cloud Run AI Challenge)
+# Reproducible multi-stage build using the repository's committed Bun lockfile.
+# The final runtime remains Node.js 22 to match the current Cloud Run service.
 
-FROM node:22-slim AS builder
-
+FROM oven/bun:1 AS builder
 WORKDIR /app
 
-# Install build dependencies
-COPY package*.json ./
-RUN npm ci
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-# Copy application source code
 COPY . .
+RUN bun run lint
+RUN bun run build
 
-# Run production build (Vite client SPA + esbuild bundled backend server)
-RUN npm run build
+FROM oven/bun:1 AS production-deps
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --production --frozen-lockfile
 
-# Runtime Stage
 FROM node:22-slim AS runner
-
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copy package manifests and production dependencies
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-# Copy compiled artifacts, policy data, and vector embeddings from builder
+COPY package.json ./
+COPY --from=production-deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/data ./data
-COPY --from=builder /app/public ./public
 
-# Expose standard Cloud Run ingress port
 EXPOSE 3000
-
-# Cloud Run execution command
 CMD ["node", "dist/server.cjs"]
