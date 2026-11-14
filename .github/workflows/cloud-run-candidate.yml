@@ -126,6 +126,7 @@ jobs:
             --region "${GCP_REGION}" \
             --platform managed \
             --no-traffic \
+            --remove-annotations run.googleapis.com/sources \
             --tag github-candidate \
             --quiet
 
