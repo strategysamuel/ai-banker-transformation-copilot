@@ -76,10 +76,12 @@ jobs:
           print("Existing production allocation:",production)
           PY
 
+      - name: Validate candidate revision and health
+        run: |
+          set -euo pipefail
           gcloud run revisions describe "${{ steps.verify.outputs.revision }}" \
             --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
             --format=json > /tmp/candidate-revision.json
-
           python - <<'PY'
           import json
           d=json.load(open("/tmp/candidate-revision.json"))
@@ -89,7 +91,6 @@ jobs:
               raise SystemExit(f"Candidate revision is not Ready: {ready}")
           print("Candidate revision Ready=True")
           PY
-
           curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
             "${{ steps.verify.outputs.url }}/api/health" -o /tmp/candidate-health.json
           python - <<'PY'
