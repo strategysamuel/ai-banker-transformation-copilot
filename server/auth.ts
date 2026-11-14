@@ -22,7 +22,7 @@ export function isValidFirebaseIdentityClaims(payload: {
   sub?: unknown;
   auth_time?: unknown;
   user_id?: unknown;
-}): payload is { sub: string; auth_time: number; user_id?: string } {
+}): boolean {
   const uid = payload.sub;
   const authTime = payload.auth_time;
   return (
@@ -89,7 +89,7 @@ export async function authenticateFirebaseToken(
     }
 
     req.user = {
-      uid: payload.sub,
+      uid: payload.sub as string,
       ...(typeof payload.email === 'string' ? { email: payload.email } : {}),
     };
 
