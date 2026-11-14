@@ -264,6 +264,8 @@ export interface SearchOptions {
   userRegion?: string;
   topK?: number;
   minSimilarity?: number;
+  /** Deterministic embedding injection for offline retrieval tests; production callers should omit. */
+  queryEmbedding?: number[];
 }
 
 /**
@@ -294,7 +296,7 @@ export async function retrieveRelevantChunks(
   const userRegion = options.userRegion || 'ALL-DEMO-REGIONS';
 
   // Generate query embedding using the configured EMBEDDING_MODEL
-  const queryEmbedding = await generateTextEmbedding(query);
+  const queryEmbedding = options.queryEmbedding ?? await generateTextEmbedding(query);
 
   // Model & Dimensionality safety check: Prevent comparing query vector against mismatched index
   if (index.embeddingModel !== EMBEDDING_MODEL) {
