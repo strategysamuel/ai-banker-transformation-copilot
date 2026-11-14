@@ -365,7 +365,7 @@ export async function retrieveRelevantChunks(
 
   // Evaluate sufficiency against threshold
   if (highestScore < minSimilarity || topCandidates.length === 0) {
-    console.log(`[Project Compass RAG] Query "${query}" top score ${highestScore.toFixed(4)} is below threshold ${minSimilarity.toFixed(4)}. Returning policy_not_found.`);
+    console.log(`[Project Compass RAG] Retrieval returned policy_not_found (top score: ${highestScore.toFixed(4)}, threshold: ${minSimilarity.toFixed(4)}).`);
     return {
       status: 'policy_not_found',
       chunks: [],
@@ -379,7 +379,7 @@ export async function retrieveRelevantChunks(
   // Keep all top candidates that are within a reasonable margin of highest score or meet threshold
   const qualifyingChunks = topCandidates.filter((c) => c.similarityScore >= minSimilarity - 0.05);
 
-  console.log(`[Project Compass RAG] Query "${query}" retrieved ${qualifyingChunks.length} chunks (top score: ${highestScore.toFixed(4)} for ${qualifyingChunks[0].policyId} ${qualifyingChunks[0].title}).`);
+  console.log(`[Project Compass RAG] Retrieved ${qualifyingChunks.length} chunks (top score: ${highestScore.toFixed(4)} for ${qualifyingChunks[0].policyId} ${qualifyingChunks[0].title}).`);
 
   return {
     status: 'grounded',
