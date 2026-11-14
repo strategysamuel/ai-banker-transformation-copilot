@@ -64,9 +64,12 @@ jobs:
           url=c.get("url","")
           if not url:
               raise SystemExit("Candidate URL is missing. Refusing promotion.")
-          production=[t for t in traffic if not t.get("tag") and t.get("percent",0)>0]
-          if not production or sum(t.get("percent",0) for t in production)!=100:
-              raise SystemExit("Current production traffic is not a complete 100% allocation. Refusing promotion.")
+          active=[t for t in traffic if t.get("percent",0)>0]
+          if not active or sum(t.get("percent",0) for t in active)!=100:
+              raise SystemExit(f"Current Cloud Run traffic is not a complete 100% allocation: {traffic}")
+          production=[{"revisionName":t.get("revisionName"),"percent":t.get("percent",0)} for t in active]
+          if any(not t["revisionName"] for t in production):
+              raise SystemExit(f"An active traffic target has no pinned revision: {active}")
           with open(os.environ["GITHUB_OUTPUT"],"a") as f:
               f.write(f"revision={revision}\n")
               f.write(f"url={url}\n")
@@ -120,7 +123,7 @@ jobs:
         run: |
           set -euo pipefail
           rollback() {
-            echo "Production verification failed; restoring the previous traffic allocation."
+            echo "Restoring the previous Cloud Run traffic allocation."
             PREVIOUS="$(python - <<'PY'
           import json
           d=json.load(open("/tmp/production-before.json"))
@@ -131,35 +134,33 @@ jobs:
               --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
               --to-revisions="${PREVIOUS}" --quiet
           }
-          if ! curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
-            "https://${CLOUD_RUN_SERVICE}-y25s3neq3a-uw.a.run.app/api/health" -o /tmp/production-health.json; then
-            rollback
-            exit 1
-          fi
-          if ! python - <<'PY'
+          trap 'rc=$?; echo "Post-promotion verification failed (exit $rc); rolling back."; rollback; exit "$rc"' ERR
+
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
+            "https://${CLOUD_RUN_SERVICE}-y25s3neq3a-uw.a.run.app/api/health" -o /tmp/production-health.json
+          python - <<'PY'
           import json
           h=json.load(open("/tmp/production-health.json"))
           if h.get("status")!="healthy" or h.get("service")!="ai-banker-transformation-copilot":
               raise SystemExit("Production health validation failed.")
           print("Production health validated:",h)
           PY
-          then
-            rollback
-            exit 1
-          fi
 
           gcloud run services describe "${CLOUD_RUN_SERVICE}" \
             --project "${GCP_PROJECT_ID}" --region "${GCP_REGION}" \
             --format=json > /tmp/service-after.json
-          python - <<'PY'
-          import json
+          EXPECTED_REVISION="${{ steps.verify.outputs.revision }}" python - <<'PY'
+          import json, os
           d=json.load(open("/tmp/service-after.json"))
           traffic=d.get("status",{}).get("traffic",[])
-          prod=[t for t in traffic if not t.get("tag") and t.get("percent",0)>0]
-          if len(prod)!=1 or prod[0].get("revisionName")!="${{ steps.verify.outputs.revision }}" or prod[0].get("percent")!=100:
-              raise SystemExit(f"Unexpected production traffic after promotion: {prod}")
-          print("Verified production traffic:",prod)
+          active=[t for t in traffic if t.get("percent",0)>0]
+          expected=os.environ["EXPECTED_REVISION"]
+          total=sum(t.get("percent",0) for t in active)
+          if total!=100 or len(active)!=1 or active[0].get("revisionName")!=expected or active[0].get("percent")!=100:
+              raise SystemExit(f"Unexpected active Cloud Run traffic allocation: {traffic}")
+          print("Verified 100% production traffic on revision:",expected)
           PY
+          trap - ERR
 
       - name: Publish production promotion summary
         if: always()
