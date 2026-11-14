@@ -1,0 +1,129 @@
+name: Build and deploy Cloud Run candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloud-run-production-candidate
+  cancel-in-progress: false
+
+env:
+  GCP_PROJECT_ID: gen-lang-client-0113378314
+  GCP_REGION: us-west1
+  CLOUD_RUN_SERVICE: ai-banker-transformation-copilot
+  ARTIFACT_REPOSITORY: ai-banker-copilot
+  IMAGE_NAME: app
+
+jobs:
+  verify-and-deploy-candidate:
+    runs-on: ubuntu-latest
+    environment: production-candidate
+    steps:
+      - name: Check out exact source commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type-check
+        run: bun run lint
+
+      - name: Run Firebase authentication tests
+        run: bun run test:auth
+
+      - name: Set up Java for Firestore emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Run Firestore security rules tests
+        run: npx --yes firebase-tools@14 emulators:exec --only firestore --project demo-ai-banker "bun run test:firestore-rules"
+
+      - name: Build application
+        run: bun run build
+
+      - name: Authenticate to Google Cloud using Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Configure Docker authentication
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push immutable image
+        id: image
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          IMAGE="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${ARTIFACT_REPOSITORY}/${IMAGE_NAME}:${COMMIT_SHA}"
+          docker build --pull --platform linux/amd64 --tag "${IMAGE}" .
+          docker push "${IMAGE}"
+          echo "uri=${IMAGE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Deploy isolated candidate revision without shifting production traffic
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+        run: |
+          set -euo pipefail
+          gcloud run deploy "${CLOUD_RUN_SERVICE}" \
+            --image "${IMAGE_URI}" \
+            --project "${GCP_PROJECT_ID}" \
+            --region "${GCP_REGION}" \
+            --platform managed \
+            --no-traffic \
+            --tag github-candidate \
+            --quiet
+
+      - name: Resolve candidate URL and smoke-test health endpoint
+        id: smoke
+        run: |
+          set -euo pipefail
+          gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project "${GCP_PROJECT_ID}" \
+            --region "${GCP_REGION}" \
+            --format=json > /tmp/cloud-run-service.json
+
+          CANDIDATE_URL="$(python -c 'import json; d=json.load(open("/tmp/cloud-run-service.json")); matches=[t for t in d.get("status",{}).get("traffic",[]) if t.get("tag")=="github-candidate"]; print(matches[0].get("url","") if matches else "")')"
+          if [ -z "${CANDIDATE_URL}" ]; then
+            echo "Could not resolve the github-candidate tagged URL." >&2
+            exit 1
+          fi
+
+          echo "url=${CANDIDATE_URL}" >> "${GITHUB_OUTPUT}"
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 --retry-all-errors \
+            "${CANDIDATE_URL}/api/health"
+
+      - name: Publish candidate deployment summary
+        if: always()
+        run: |
+          {
+            echo "## Cloud Run candidate deployment"
+            echo "- Project: ${GCP_PROJECT_ID}"
+            echo "- Region: ${GCP_REGION}"
+            echo "- Service: ${CLOUD_RUN_SERVICE}"
+            echo "- Source commit: ${GITHUB_SHA}"
+            echo "- Production traffic: unchanged by this workflow"
+            if [ -n "${{ steps.smoke.outputs.url }}" ]; then
+              echo "- Candidate URL: ${{ steps.smoke.outputs.url }}"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
