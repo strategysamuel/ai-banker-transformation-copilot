@@ -12,7 +12,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test:firestore-rules": "tsx --test tests/firestore.rules.test.ts",
-    "test:auth": "tsx --test server/auth.test.ts"
+    "test:auth": "tsx --test server/auth.test.ts",
+    "test:project-compass-governance": "tsx scripts/test-phase3c-governance.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
