@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
 import firebaseConfig from '../firebase-applet-config.json';
 
 export interface AuthenticatedRequest extends Request {
@@ -9,6 +9,8 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+type FirebaseTokenVerifier = (token: string) => Promise<JWTPayload>;
+
 // Firebase Auth signs ID tokens with Google's Secure Token service account keys.
 const FIREBASE_JWKS = createRemoteJWKSet(
   new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com')
@@ -16,6 +18,16 @@ const FIREBASE_JWKS = createRemoteJWKSet(
 
 const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
 const FIREBASE_ISSUER = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
+
+async function verifyFirebaseIdToken(idToken: string): Promise<JWTPayload> {
+  const { payload } = await jwtVerify(idToken, FIREBASE_JWKS, {
+    algorithms: ['RS256'],
+    issuer: FIREBASE_ISSUER,
+    audience: FIREBASE_PROJECT_ID,
+    requiredClaims: ['exp', 'iat', 'sub', 'auth_time'],
+  });
+  return payload;
+}
 
 /** Validate Firebase-specific identity claims after cryptographic JWT verification. */
 export function isValidFirebaseIdentityClaims(payload: {
@@ -31,56 +43,39 @@ export function isValidFirebaseIdentityClaims(payload: {
     uid.length <= 128 &&
     typeof authTime === 'number' &&
     Number.isFinite(authTime) &&
+    authTime >= 0 &&
     authTime <= Math.floor(Date.now() / 1000) + 60 &&
     (payload.user_id === undefined || payload.user_id === uid)
   );
 }
 
 /**
- * Accepts Firebase Authentication ID tokens only.
- *
- * Google OAuth ID tokens, unsigned/decoded JWTs, and tokens with a different
- * issuer or audience are deliberately rejected. The authenticated UID comes
- * only from the verified Firebase token's subject claim.
+ * Creates Firebase authentication middleware. The optional verifier is exposed
+ * for deterministic local tests; production routes use the Google JWKS verifier.
  */
-export async function authenticateFirebaseToken(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  const authHeader = req.headers.authorization;
-  const match = typeof authHeader === 'string'
-    ? /^Bearer\s+(\S+)$/i.exec(authHeader)
-    : null;
+export function createFirebaseAuthMiddleware(
+  verifyToken: FirebaseTokenVerifier = verifyFirebaseIdToken
+) {
+  return async function authenticateFirebaseToken(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const authHeader = req.headers.authorization;
+    const match = typeof authHeader === 'string'
+      ? /^Bearer\s+(\S+)$/i.exec(authHeader)
+      : null;
 
-  if (!match) {
-    res.status(401).json({
-      error: 'Unauthorized: Expected Authorization: Bearer <Firebase_ID_Token>.',
-      code: 'AUTH_HEADER_MISSING',
-    });
-    return;
-  }
+    if (!match) {
+      res.status(401).json({
+        error: 'Unauthorized: Expected Authorization: Bearer <Firebase_ID_Token>.',
+        code: 'AUTH_HEADER_MISSING',
+      });
+      return;
+    }
 
-  const idToken = match[1];
-
-  // Avoid processing unexpectedly large Authorization headers.
-  if (idToken.length > 16_384) {
-    res.status(401).json({
-      error: 'Unauthorized: Invalid or expired Firebase ID token.',
-      code: 'AUTH_TOKEN_INVALID',
-    });
-    return;
-  }
-
-  try {
-    const { payload } = await jwtVerify(idToken, FIREBASE_JWKS, {
-      algorithms: ['RS256'],
-      issuer: FIREBASE_ISSUER,
-      audience: FIREBASE_PROJECT_ID,
-      requiredClaims: ['exp', 'iat', 'sub', 'auth_time'],
-    });
-
-    if (!isValidFirebaseIdentityClaims(payload)) {
+    const idToken = match[1];
+    if (idToken.length > 16_384) {
       res.status(401).json({
         error: 'Unauthorized: Invalid or expired Firebase ID token.',
         code: 'AUTH_TOKEN_INVALID',
@@ -88,17 +83,30 @@ export async function authenticateFirebaseToken(
       return;
     }
 
-    req.user = {
-      uid: payload.sub as string,
-      ...(typeof payload.email === 'string' ? { email: payload.email } : {}),
-    };
+    try {
+      const payload = await verifyToken(idToken);
+      if (!isValidFirebaseIdentityClaims(payload)) {
+        res.status(401).json({
+          error: 'Unauthorized: Invalid or expired Firebase ID token.',
+          code: 'AUTH_TOKEN_INVALID',
+        });
+        return;
+      }
 
-    next();
-  } catch {
-    // Do not log token contents, decoded claims, or provider verification details.
-    res.status(401).json({
-      error: 'Unauthorized: Invalid or expired Firebase ID token.',
-      code: 'AUTH_TOKEN_INVALID',
-    });
-  }
+      req.user = {
+        uid: payload.sub as string,
+        ...(typeof payload.email === 'string' ? { email: payload.email } : {}),
+      };
+      next();
+    } catch {
+      // Do not log token contents, decoded claims, or provider verification details.
+      res.status(401).json({
+        error: 'Unauthorized: Invalid or expired Firebase ID token.',
+        code: 'AUTH_TOKEN_INVALID',
+      });
+    }
+  };
 }
+
+// Production middleware always uses the strict Google JWKS verifier above.
+export const authenticateFirebaseToken = createFirebaseAuthMiddleware();
