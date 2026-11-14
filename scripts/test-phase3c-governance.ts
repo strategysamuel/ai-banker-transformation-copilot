@@ -89,12 +89,17 @@ async function runPhase3CGovernanceTests() {
     'PC-WIRE-001 is classified as HIGH_OPERATIONAL_RISK requiring verification'
   );
 
-  const poaRisk = evaluatePolicyRisk('PC-POA-003', 'Power of Attorney Verification & Validation SOP');
+  const poaRisk = evaluatePolicyRisk('PC-POA-001', 'Power of Attorney Handling SOP');
   assert(
     poaRisk.isHighRisk && poaRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
-    'PC-POA-003 is classified as HIGH_OPERATIONAL_RISK requiring verification'
+    'PC-POA-001 (the live POA SOP) is classified as HIGH_OPERATIONAL_RISK requiring verification'
   );
 
+  const poaRisk = evaluatePolicyRisk('PC-POA-001', 'Power of Attorney Handling SOP');
+  assert(
+    poaRisk.isHighRisk && poaRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
+    'PC-POA-001 (the live POA SOP) is classified as HIGH_OPERATIONAL_RISK requiring verification'
+  );
   const feeRisk = evaluatePolicyRisk('PC-FEE-004', 'Retail Service Fee Waiver & Authorization SOP');
   assert(
     feeRisk.isHighRisk && feeRisk.riskLevel === 'HIGH_OPERATIONAL_RISK',
@@ -151,16 +156,16 @@ async function runPhase3CGovernanceTests() {
   // Test Group 4: Effective Date & Scheduled Review Date Safety
   // -------------------------------------------------------------
   console.log('\n--- Test Group 4: Effective Date & Scheduled Review Safety ---');
-  const pastEval = evaluateReviewDate('2025-01-01');
+  const pastEval = evaluateReviewDate('2025-01-01', '2026-09-01');
   assert(pastEval.type === 'PAST_REVIEW', 'Past review date evaluated as PAST_REVIEW warning');
 
-  const futureEval = evaluateReviewDate('2028-01-01');
+  const futureEval = evaluateReviewDate('2028-01-01', '2026-09-01');
   assert(futureEval.type === 'CURRENT', 'Future review date evaluated as CURRENT');
 
   // Approaching review (e.g. 30 days from simulated date)
   const simulatedNow = new Date('2026-09-01T00:00:00Z');
   const approachingDate = new Date(simulatedNow.getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const approachingEval = evaluateReviewDate(approachingDate);
+  const approachingEval = evaluateReviewDate(approachingDate, '2026-09-01');
   assert(approachingEval.type === 'APPROACHING_REVIEW', 'Date within 90 days evaluated as APPROACHING_REVIEW');
 
   // -------------------------------------------------------------
@@ -223,6 +228,20 @@ async function runPhase3CGovernanceTests() {
   assert(
     valResult2.citations.length === 1 && valResult2.citations[0].policyId === 'PC-WIRE-001',
     'Fabricated citations stripped and replaced with genuine retrieved SOP chunk'
+  );
+
+  const valResult3 = validateAndAlignCitations(
+    [...validRawCitations, ...fabricatedCitations],
+    mockRetrieved
+  );
+  assert(
+    !valResult3.valid && valResult3.rejectedCitations.length === 1,
+    'Mixed valid and fabricated citations fail closed'
+  );
+  const valResult4 = validateAndAlignCitations([], mockRetrieved);
+  assert(
+    !valResult4.valid,
+    'Missing model citations do not pass citation validation'
   );
 
   // -------------------------------------------------------------
