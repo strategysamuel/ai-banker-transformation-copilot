@@ -1351,7 +1351,7 @@ export interface GroundedCompassAnswerOutput {
  * Normalizes and validates raw JSON from Gemini into a structured GroundedCompassAnswerOutput.
  * Strictly verifies citations against actual retrieved chunks.
  */
-function parseAndValidateCompassJSON(
+export function parseAndValidateCompassJSON(
   rawText: string,
   retrievedChunks: Array<{
     policyId: string;
@@ -1406,6 +1406,19 @@ function parseAndValidateCompassJSON(
   const answer = toString(parsed.answer, 'Grounded policy guidance based on authorized Standard Operating Procedures.');
   const keySteps = toStringArray(parsed.keySteps, []);
   const cautions = toStringArray(parsed.cautions, []);
+  // A refusal must never inherit retrieved chunks as authoritative citations.
+  const refusalPattern = /no (?:authorized )?(?:policy|matching policy|sufficient evidence) (?:was )?found|cannot find an authorized policy|insufficient (?:policy )?evidence|no matching authorized policy/i;
+  const isPolicyNotFound = parsed.status === 'policy_not_found' || refusalPattern.test(answer);
+  if (isPolicyNotFound) {
+    return {
+      status: 'policy_not_found',
+      answer,
+      keySteps: [],
+      cautions: [],
+      citations: [],
+      requiresHumanVerification: true,
+    };
+  }
 
   // Citation Validation: Ensure all citations correspond strictly to actual retrieved chunks
   const parsedCitations: GroundedCompassAnswerOutput['citations'] = [];
