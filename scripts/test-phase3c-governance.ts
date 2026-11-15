@@ -26,7 +26,7 @@ import {
   getVectorStoreSummary,
   buildPolicyChunks,
 } from '../server/projectCompassRag';
-import { PROJECT_COMPASS_SYSTEM_INSTRUCTION } from '../server/gemini';
+import { PROJECT_COMPASS_SYSTEM_INSTRUCTION, parseAndValidateCompassJSON } from '../server/gemini';
 import { SYNTHETIC_SOP_CATALOG, ALL_SYNTHETIC_SOPS } from '../src/data/projectCompassData';
 
 let passed = 0;
@@ -194,6 +194,30 @@ async function runPhase3CGovernanceTests() {
       similarityScore: 0.95,
     },
   ];
+
+  // Refusal regression: retrieved but merely related chunks must not become citations.
+  const refusalByText = parseAndValidateCompassJSON(JSON.stringify({
+    status: 'grounded',
+    answer: 'No authorized policy was found for PC-CRYPTO-999. Please consult the policy owner.',
+    keySteps: ['Do not process the request.'],
+    cautions: [],
+    citations: [],
+  }), mockRetrieved);
+  assert(
+    refusalByText.status === 'policy_not_found' && refusalByText.citations.length === 0,
+    'Refusal text overrides an incorrect grounded status and suppresses fallback citations'
+  );
+  const refusalByStatus = parseAndValidateCompassJSON(JSON.stringify({
+    status: 'policy_not_found',
+    answer: 'No authorized policy was found.',
+    keySteps: [],
+    cautions: [],
+    citations: [],
+  }), mockRetrieved);
+  assert(
+    refusalByStatus.status === 'policy_not_found' && refusalByStatus.citations.length === 0,
+    'Explicit policy_not_found status always returns zero citations'
+  );
 
   // Case 1: Valid citation matching retrieved chunk
   const validRawCitations = [

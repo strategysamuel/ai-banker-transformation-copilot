@@ -213,6 +213,41 @@ async function startServer() {
         const result = await generateGroundedProjectCompassAnswer(trimmedQuery, retrieval.chunks);
         const latencyMs = Date.now() - startTime;
 
+        // A model refusal is a negative result, not a grounded answer. Do not
+        // validate or display nearby retrievals as citations for unsupported requests.
+        if (result.output.status === 'policy_not_found') {
+          logGovernanceAuditRecord({
+            authenticatedUid: userId,
+            queryId: requestId,
+            query: '[REDACTED FOR PRIVACY]',
+            retrievedChunkIds: retrieval.chunks.map((c) => c.chunkId),
+            policyIds: Array.from(new Set(retrieval.chunks.map((c) => c.policyId))),
+            policyVersions: Array.from(new Set(retrieval.chunks.map((c) => c.version))),
+            similarityScores: retrieval.chunks.map((c) => c.similarityScore),
+            citationAnchors: [],
+            modelUsed: result.modelUsed,
+            responseStatus: 'policy_not_found',
+            highRiskClassification: false,
+            verificationRequired: true,
+          });
+
+          res.json({
+            status: 'policy_not_found',
+            message: result.output.answer,
+            citations: [],
+            requiresHumanVerification: true,
+            verificationReason: 'No retrieved excerpt authorizes the requested procedure. Consult the policy owner or Operations Policy Helpdesk.',
+            topSimilarityScore: retrieval.topScore,
+            retrievedCount: 0,
+            modelUsed: result.modelUsed,
+            demoDataNotice,
+            advisoryDisclaimer,
+            blindTrustWarning,
+            timestamp: new Date().toISOString(),
+          });
+          return;
+        }
+
         // 8. Server-side Citation Validation & Alignment
         const citationValidation = validateAndAlignCitations(result.output.citations, retrieval.chunks);
         const finalCitations = citationValidation.citations;
