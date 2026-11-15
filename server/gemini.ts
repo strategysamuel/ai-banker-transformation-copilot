@@ -1307,8 +1307,8 @@ ABSOLUTE GOVERNANCE & GROUNDING MANDATES:
 OUTPUT FORMAT REQUIREMENTS:
 You MUST respond with a valid JSON object matching this exact schema:
 {
-  "status": "grounded",
-  "answer": "string (Concise, policy-grounded guidance answering the question based strictly on provided excerpts)",
+  "status": "grounded" | "policy_not_found",
+  "answer": "string (Concise, policy-grounded guidance, or an explicit no-authorized-policy-found refusal)",
   "keySteps": ["string (Step 1)", "string (Step 2)", "..."],
   "cautions": ["string (Important threshold, dual-approval, or escalation warning)", "..."],
   "citations": [
@@ -1533,7 +1533,7 @@ ${formattedExcerpts}
 </AUTHORIZED_POLICY_EXCERPTS>
 
 INSTRUCTIONS:
-Answer the user's question using ONLY the provided policy excerpts. Follow the JSON schema strictly without extra commentary. Ensure every fact is cited.`;
+Answer the user's question using ONLY the provided policy excerpts. Set status to "grounded" ONLY when the excerpts substantively support the requested procedure. If the requested policy ID is absent, or the excerpts are merely related and do not answer the request, set status to "policy_not_found", state that no authorized policy was found, and return empty keySteps, cautions, and citations. Never cite merely related policies as authority for an unsupported request. Follow the JSON schema strictly without extra commentary. Ensure every substantive fact is cited.`;
 
   const contents = [
     {
