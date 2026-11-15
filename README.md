@@ -6,7 +6,7 @@
 
 ## 1. Project Overview
 
-The **AI Banker Transformation Copilot** is a production-grade enterprise assistant built specifically for commercial, retail, and private banking professionals. Modern banking workflows face a critical tension: frontline professionals require rapid, contextual guidance to navigate intricate standard operating procedures (SOPs), customer interactions, and operational tasks, yet strict regulatory frameworks prohibit hallucinations, data leakage, and ungrounded AI decision-making.
+The **AI Banker Transformation Copilot** is an open-source, demonstration-oriented AI workspace exploring how commercial, retail, and private banking professionals could be supported by grounded generative AI workflows. Modern banking workflows face a critical tension: frontline professionals require rapid, contextual guidance to navigate intricate standard operating procedures (SOPs), customer interactions, and operational tasks, yet strict regulatory frameworks prohibit hallucinations, data leakage, and ungrounded AI decision-making.
 
 The **AI Banker Transformation Copilot** solves this by pairing Google's **Gemini models** with **Project Compass**—a deterministic, retrieval-augmented governance and policy intelligence engine designed with strict human-in-the-loop validation, policy version isolation, and zero-trust security controls.
 
@@ -221,3 +221,27 @@ You may use, reproduce, modify, and distribute this software in accordance with 
 See the [LICENSE](./LICENSE) file for the complete licence text.
 
 Third-party components and dependencies remain subject to their respective licences.
+
+
+---
+
+## 13. Open-source community
+
+This repository is licensed under [Apache License 2.0](./LICENSE).
+
+We welcome focused contributions in documentation, testing, accessibility, security, and responsible AI engineering.
+
+- [Contributing guide](./CONTRIBUTING.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Security policy](./SECURITY.md)
+- [Support guide](./SUPPORT.md)
+- [Project roadmap](./ROADMAP.md)
+- [Open-source maintainer guide](./docs/OPEN_SOURCE_MAINTAINER_GUIDE.md)
+
+Please use GitHub Issues for reproducible bugs and feature proposals, and pull requests for reviewed changes. Never include API keys, credentials, real customer information, or confidential banking records.
+
+## 14. Project status and responsible-use boundary
+
+This is an actively developed demonstration project, not a certified banking product. Its sample SOPs and scenarios are synthetic and do not represent the policies of any bank, regulator, or financial institution. AI output is advisory and must not be used as the sole basis for a banking, legal, compliance, credit, or transaction decision.
+
+The repository's current workflows and tests provide automated checks, but they do not constitute independent security certification, regulatory approval, or production readiness for a financial institution. Integrations, deployment configuration, and operational controls must be independently reviewed before any real-world use.
